@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>APPLE HOUSE · 애플하우스</title>
+  <meta name="description" content="경북 청송, 3대째 사과를 키우는 애플하우스입니다. 카페·베이커리 납품과 기업 선물 문의를 받아요.">
+
+  <link rel="preload" href="asset/fonts/mungyeong-gamhong-apple.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Jua&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+
+  <!-- 사과 아이콘 (배너·결론 문장에서 재사용) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-apple" viewBox="0 0 40 40">
+      <path fill="currentColor" d="M20 13.2c-2.9-2.6-8.6-3-11.3 1.4-3 4.9-.9 13.4 3.2 17.7 2 2.1 4.1 2.7 6 1.8 1.4-.6 2.8-.6 4.2 0 1.9.9 4 .3 6-1.8 4.1-4.3 6.2-12.8 3.2-17.7-2.7-4.4-8.4-4-11.3-1.4z"/>
+      <path fill="none" stroke="#2B1D1A" stroke-width="1.8" stroke-linecap="round" d="M20 13.4c0-2.8.8-5.2 2.6-7"/>
+      <path fill="#3F6B3A" d="M22.4 8.6c1.2-3.2 4.4-4.6 7.8-3.9-.9 3.3-4.3 5.1-7.8 3.9z"/>
+    </symbol>
+  </svg>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="logo" href="#top" aria-label="APPLE HOUSE 처음으로">APPLE HOUSE</a>
+      <nav class="header-nav" aria-label="주요 메뉴">
+        <a class="nav-link" href="#year">사과의 일 년</a>
+        <a class="nav-link" href="#story">이야기</a>
+        <a class="nav-link" href="#varieties">품종</a>
+        <a class="nav-link" href="#reviews">후기</a>
+      </nav>
+      <a class="btn btn--sm header-cta" href="#contact">납품 문의</a>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- 1. 히어로 -->
+    <section class="hero" aria-label="애플하우스 소개">
+      <div class="hero-left">
+        <p class="hero-en hero-en--top" aria-hidden="true">ONE APPLE</p>
+        <!-- 와펜: float(떠오름) > enter(등장) > patch(hover) 세 겹으로 transform을 나눠 겹치지 않게 한다 -->
+        <div class="patch-float" aria-hidden="true">
+          <div class="patch-enter">
+            <figure class="patch">
+              <img src="asset/apple-patch.webp" alt="" width="680" height="800">
+            </figure>
+          </div>
+        </div>
+        <p class="hero-en hero-en--bottom" aria-hidden="true">ONE YEAR</p>
+      </div>
+
+      <div class="hero-right">
+        <div class="hero-slides" aria-hidden="true">
+          <div class="hero-slide is-active"><figure class="hero-media ph ph--spring" data-file="season-spring.webp"><img src="asset/season-spring.webp" alt="" onerror="this.hidden=true"></figure></div>
+          <div class="hero-slide"><figure class="hero-media ph ph--summer" data-file="season-summer.webp"><img src="asset/season-summer.webp" alt="" onerror="this.hidden=true"></figure></div>
+          <div class="hero-slide"><figure class="hero-media ph ph--autumn" data-file="season-autumn.webp"><img src="asset/season-autumn.webp" alt="" onerror="this.hidden=true"></figure></div>
+          <div class="hero-slide"><figure class="hero-media ph ph--winter" data-file="season-winter.webp"><img src="asset/season-winter.webp" alt="" onerror="this.hidden=true"></figure></div>
+        </div>
+        <div class="hero-copy">
+          <h1 class="hero-title">사과 한 알에,<br>일 년이 들어 있어요.</h1>
+          <p class="hero-sub">경북 청송, 3대째 사과를 키우는 애플하우스입니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 한 문장 -->
+    <section class="section statement">
+      <div class="container">
+        <h2 class="section-title reveal">좋은 사과는,<br><em>서두르지 않은</em> 일 년에서 나와요.</h2>
+        <p class="section-sub reveal" style="--d:1">빨리 키우면 크기는 커져도 맛이 비어요. 그래서 저희는 계절마다 할 일을 미루지 않고, 기다려야 할 때는 기다립니다.</p>
+      </div>
+    </section>
+
+    <!-- 3. 사과의 일 년 -->
+    <section class="frame" id="year">
+      <div class="frame-panel section">
+        <div class="container">
+          <header class="section-head">
+            <h2 class="section-title reveal">한 알이 되기까지, 사계절</h2>
+            <p class="section-sub reveal" style="--d:1">사과는 가을에 따지만, 맛은 봄부터 만들어져요.</p>
+          </header>
+
+          <ol class="seasons">
+            <li class="season-card reveal" style="--d:0">
+              <figure class="season-photo ph ph--spring" data-file="season-spring.webp"><img src="asset/season-spring.webp" alt="흰 사과꽃이 핀 가지" loading="lazy" onerror="this.hidden=true"></figure>
+              <div class="season-body">
+                <p class="season-when">SPRING · 04—05</p>
+                <h3 class="card-title">꽃을 솎아요</h3>
+                <p class="season-do">한 꽃눈에서 피는 다섯 송이 중 가운데 한 송이만 남겨요.</p>
+                <p class="season-result">한 알에 양분이 모여요.</p>
+              </div>
+            </li>
+            <li class="season-card reveal" style="--d:1">
+              <figure class="season-photo ph ph--summer" data-file="season-summer.webp"><img src="asset/season-summer.webp" alt="초록 풋사과가 달린 가지" loading="lazy" onerror="this.hidden=true"></figure>
+              <div class="season-body">
+                <p class="season-when">SUMMER · 06—08</p>
+                <h3 class="card-title">열매를 솎아요</h3>
+                <p class="season-do">열매가 맺히면 다시 골라, 한 가지에 한 알씩만 키워요.</p>
+                <p class="season-result">크기와 맛이 고르게 자라요.</p>
+              </div>
+            </li>
+            <li class="season-card reveal" style="--d:2">
+              <figure class="season-photo ph ph--autumn" data-file="season-autumn.webp"><img src="asset/season-autumn.webp" alt="빨갛게 익은 사과를 수확하는 과수원" loading="lazy" onerror="this.hidden=true"></figure>
+              <div class="season-body">
+                <p class="season-when">AUTUMN · 09—11</p>
+                <h3 class="card-title">손으로 따요</h3>
+                <p class="season-do">나무 아래 반사 필름을 깔아 고루 붉게 물들이고, 한 알씩 손으로 따요.</p>
+                <p class="season-result">상처 없이, 가장 맛있을 때 거둬요.</p>
+              </div>
+            </li>
+            <li class="season-card reveal" style="--d:3">
+              <figure class="season-photo ph ph--winter" data-file="season-winter.webp"><img src="asset/season-winter.webp" alt="잎이 진 겨울 사과나무" loading="lazy" onerror="this.hidden=true"></figure>
+              <div class="season-body">
+                <p class="season-when">WINTER · 12—02</p>
+                <h3 class="card-title">가지를 쳐요</h3>
+                <p class="season-do">잎이 진 나무의 가지를 다듬어, 내년에 햇빛이 고루 들게 해요.</p>
+                <p class="season-result">다음 해의 한 알이 준비돼요.</p>
+              </div>
+            </li>
+          </ol>
+
+          <p class="year-outro reveal">
+            <svg class="year-outro-icon" aria-hidden="true"><use href="#i-apple"/></svg>
+            그렇게 일 년이 지나야, 한 알이 됩니다.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 과수원 이야기 -->
+    <section class="section story" id="story">
+      <div class="container story-grid">
+        <div class="story-text">
+          <h2 class="section-title reveal">1968년,<br>사과나무 한 그루에서<br>시작했어요</h2>
+          <div class="story-body reveal" style="--d:1">
+            <p>할아버지는 청송 산자락에 사과나무를 처음 심으셨어요.<br>낮에는 볕이 뜨겁고 밤에는 서늘한 이 땅이, 사과를 단단하고 달게 만든다는 걸 아셨거든요.</p>
+            <p>아버지는 그 나무 옆에 나무를 더 심으셨고,<br>저는 지금 그 나무들 사이에서 일 년을 보냅니다.</p>
+            <p>3대가 지나는 동안 바뀐 것도 많지만,<br>꽃을 솎고, 열매를 고르고, 손으로 따는 일만은 그대로예요.<br>조금 느려도, 그게 한 알을 제대로 키우는 방법이라고 배웠으니까요.</p>
+          </div>
+          <p class="story-sign reveal" style="--d:2">애플하우스 3대 농부 김한결</p>
+        </div>
+        <div class="story-photos">
+          <figure class="story-photo ph ph--story reveal" style="--d:0" data-file="story-01.webp"><img src="asset/story-01.webp" alt="나무 상자에 담긴 사과" loading="lazy" onerror="this.hidden=true"></figure>
+          <figure class="story-photo ph ph--story reveal" style="--d:1" data-file="story-02.webp"><img src="asset/story-02.webp" alt="사과를 고르는 농부의 손" loading="lazy" onerror="this.hidden=true"></figure>
+          <figure class="story-photo ph ph--story reveal" style="--d:2" data-file="story-03.webp"><img src="asset/story-03.webp" alt="사과나무 사이로 난 과수원 길" loading="lazy" onerror="this.hidden=true"></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 품종 -->
+    <section class="section varieties" id="varieties">
+      <div class="container">
+        <header class="section-head">
+          <h2 class="section-title reveal">계절마다, 다른 한 알</h2>
+          <p class="section-sub reveal" style="--d:1">가을 석 달 동안, 세 가지 사과를 차례로 거둬요.</p>
+        </header>
+
+        <ul class="variety-grid">
+          <li class="variety-card reveal" style="--d:0">
+            <figure class="variety-photo"><span class="variety-apple ph ph--apple" data-file="apple-01.webp"><img src="asset/apple-01.webp" alt="홍로 사과" loading="lazy" onerror="this.hidden=true"></span></figure>
+            <div class="variety-head">
+              <h3 class="card-title">홍로</h3>
+              <p class="variety-month">9월</p>
+            </div>
+            <p class="variety-taste">새콤함이 적고 단맛이 먼저 와요. 가을을 가장 먼저 여는 사과예요.</p>
+            <dl class="variety-use"><dt>어울리는 곳</dt><dd>생과 디저트, 추석 선물</dd></dl>
+          </li>
+          <li class="variety-card reveal" style="--d:1">
+            <figure class="variety-photo"><span class="variety-apple ph ph--apple" data-file="apple-02.webp"><img src="asset/apple-02.webp" alt="시나노골드 사과" loading="lazy" onerror="this.hidden=true"></span></figure>
+            <div class="variety-head">
+              <h3 class="card-title">시나노골드</h3>
+              <p class="variety-month">10월</p>
+            </div>
+            <p class="variety-taste">노란 껍질에 새콤달콤한 맛, 향이 진해요.</p>
+            <dl class="variety-use"><dt>어울리는 곳</dt><dd>타르트, 음료, 색다른 선물</dd></dl>
+          </li>
+          <li class="variety-card reveal" style="--d:2">
+            <figure class="variety-photo"><span class="variety-apple ph ph--apple" data-file="apple-03.webp"><img src="asset/apple-03.webp" alt="부사 사과" loading="lazy" onerror="this.hidden=true"></span></figure>
+            <div class="variety-head">
+              <h3 class="card-title">부사</h3>
+              <p class="variety-month">11월</p>
+            </div>
+            <p class="variety-taste">아삭하고 과즙이 많아요. 오래 두어도 맛이 잘 유지돼요.</p>
+            <dl class="variety-use"><dt>어울리는 곳</dt><dd>베이킹, 주스, 연말 선물</dd></dl>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 6. 배너 -->
+    <section class="section banner" aria-label="따고, 고르고, 담아내다">
+      <div class="icon-row" aria-hidden="true">
+        <div class="icon-track">
+          <div class="icon-group">
+            <svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg>
+            <svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg>
+            <svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg>
+          </div>
+        </div>
+      </div>
+      <p class="banner-text section-title reveal">따고, 고르고, 담아내다.</p>
+      <div class="icon-row icon-row--reverse" aria-hidden="true">
+        <div class="icon-track">
+          <div class="icon-group">
+            <svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg>
+            <svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg>
+            <svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. 약속 -->
+    <section class="section promise">
+      <div class="container">
+        <header class="section-head">
+          <h2 class="section-title reveal">좋은 한 알만 보내는 네 가지 약속</h2>
+        </header>
+        <ul class="stamps">
+          <li class="stamp reveal" style="--d:0; --r:-6deg">
+            <strong class="stamp-big">100%</strong>
+            <span class="stamp-small">손으로 따요</span>
+          </li>
+          <li class="stamp reveal" style="--d:1; --r:5deg">
+            <strong class="stamp-big">14 Brix</strong>
+            <span class="stamp-small">당도 기준을 넘는<br>사과만 보내요</span>
+          </li>
+          <li class="stamp reveal" style="--d:2; --r:-3deg">
+            <strong class="stamp-big">48h</strong>
+            <span class="stamp-small">수확 후 이틀 안에<br>출고해요</span>
+          </li>
+          <li class="stamp reveal" style="--d:3; --r:7deg">
+            <strong class="stamp-big stamp-big--since">SINCE<br>1968</strong>
+            <span class="stamp-small">3대째 같은 땅에서<br>키워요</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 8. 납품처 후기 -->
+    <section class="section reviews" id="reviews">
+      <div class="container">
+        <header class="section-head">
+          <h2 class="section-title reveal">먼저 받아 본 분들의 이야기</h2>
+        </header>
+      </div>
+      <div class="review-marquee reveal" style="--d:1">
+        <div class="review-track">
+          <ul class="review-group">
+            <li class="review-card">
+              <p class="review-quote">“박스마다 크기가 고르니 타르트 모양이 일정하게 나와요. 그게 제일 편해요.”</p>
+              <p class="review-from">서울 성수동 베이커리 사장님</p>
+            </li>
+            <li class="review-card">
+              <p class="review-quote">“시나노골드를 처음 써 봤는데, 손님들이 이 노란 사과 뭐냐고 많이 물어보세요.”</p>
+              <p class="review-from">대구 디저트 카페 사장님</p>
+            </li>
+            <li class="review-card">
+              <p class="review-quote">“추석 선물로 보냈더니 받은 분들이 과수원 이야기 카드까지 좋아하셨어요.”</p>
+              <p class="review-from">IT 기업 총무팀 담당자</p>
+            </li>
+            <li class="review-card">
+              <p class="review-quote">“11월 부사는 겨울 내내 주스로 써도 맛이 떨어지지 않아요.”</p>
+              <p class="review-from">부산 주스 바 사장님</p>
+            </li>
+            <li class="review-card">
+              <p class="review-quote">“주문하면 수확 일정부터 알려 주셔서 메뉴 계획 세우기가 쉬워요.”</p>
+              <p class="review-from">제주 브런치 카페 사장님</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. 납품·제휴 문의 -->
+    <section class="frame" id="contact">
+      <div class="frame-panel section">
+        <div class="container contact-grid">
+          <div class="contact-intro">
+            <h2 class="section-title reveal">올가을, 한 알을<br>함께 나눠요.</h2>
+            <p class="section-sub reveal" style="--d:1">남겨 주시면 수확 일정과 함께 이틀 안에 연락드릴게요.</p>
+          </div>
+
+          <div class="contact-body reveal" style="--d:1">
+            <form class="contact-form">
+              <div class="field">
+                <label for="f-company">업체명</label>
+                <input id="f-company" name="company" type="text" placeholder="카페, 베이커리, 회사 이름" autocomplete="organization" required>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="f-name">담당자명</label>
+                  <input id="f-name" name="name" type="text" placeholder="성함을 알려주세요" autocomplete="name" required>
+                </div>
+                <div class="field">
+                  <label for="f-phone">연락처</label>
+                  <input id="f-phone" name="phone" type="tel" placeholder="010-0000-0000" autocomplete="tel" inputmode="tel" required>
+                </div>
+              </div>
+              <div class="field">
+                <label for="f-type">문의 유형</label>
+                <select id="f-type" name="type" required>
+                  <option value="cafe">카페·베이커리 납품</option>
+                  <option value="gift">기업 선물</option>
+                  <option value="etc">기타</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="f-message">문의 내용 (선택)</label>
+                <textarea id="f-message" name="message" rows="4" placeholder="필요한 품종이나 시기를 편하게 적어주세요"></textarea>
+              </div>
+              <button class="btn" type="submit">납품 문의하기</button>
+            </form>
+
+            <div class="contact-done" role="status" tabindex="-1" hidden>
+              <svg class="contact-done-icon" aria-hidden="true"><use href="#i-apple"/></svg>
+              <p>접수됐어요! 이틀 안에 연락드릴게요.<br>그동안 사과는 나무에서 조금 더 익어 갈게요.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p class="logo logo--footer">APPLE HOUSE</p>
+      <p class="footer-contact">경북 청송군 · 054-000-0000 · hello@applehouse.kr</p>
+      <p class="footer-copy">© 2026 APPLE HOUSE</p>
+    </div>
+  </footer>
+
+</body>
+</html>
