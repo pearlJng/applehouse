@@ -3,6 +3,12 @@
    ========================================================= */
 
 @font-face {
+  font-family: 'Hippie';
+  src: url('asset/fonts/hippie.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
   font-family: 'Mungyeong Gamhong Apple';
   src: url('asset/fonts/mungyeong-gamhong-apple.woff2') format('woff2');
   font-display: swap;
@@ -23,12 +29,14 @@
   /* placeholder tints */
 
   /* type */
-  --font-display: 'Mungyeong Gamhong Apple', 'Jua', 'Pretendard Variable', sans-serif;
+  --font-display: 'Hippie', 'Mungyeong Gamhong Apple', 'Jua', sans-serif;
   --font-en: 'Archivo', 'Pretendard Variable', sans-serif;
   --font-body: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
 
-  --fs-display: clamp(40px, 3.6vw, 56px);
-  --fs-title: clamp(32px, 3.4vw, 48px);
+  /* 히피체는 같은 크기에서 글자 높이가 문경감홍사과체의 약 78% → 약 1.28배로 키워 시각적 크기를 맞춘다 */
+  --fs-display: clamp(52px, 4.6vw, 72px);
+  --fs-title: clamp(40px, 4.3vw, 60px);
+  --lh-title: 1.2;
   --fs-subtitle: 22px;
   --fs-lead: 18px;
   --fs-body: 17px;
@@ -38,7 +46,6 @@
   --section-y: clamp(96px, 9vw, 128px);
   --gutter: 64px;
   --container: 1240px;
-  --frame: 32px;
   --header-h: 72px;
 
   --radius-card: 20px;
@@ -85,9 +92,10 @@ em { font-style: normal; }
 /* ---------- Section title (전 섹션 공통) ---------- */
 .section-title {
   font-family: var(--font-display);
+  font-synthesis: none; /* 히피체는 400 하나뿐: 가짜 굵게·기울임 금지 */
   font-size: var(--fs-title);
   font-weight: 400;
-  line-height: 1.3;
+  line-height: var(--lh-title);
   letter-spacing: 0;
   text-wrap: balance;
 }
@@ -104,12 +112,6 @@ em { font-style: normal; }
 .section-head {
   text-align: center;
   margin-bottom: 64px;
-}
-
-.card-title {
-  font-size: var(--fs-subtitle);
-  font-weight: 700;
-  line-height: 1.4;
 }
 
 /* ---------- Placeholder ---------- */
@@ -264,6 +266,14 @@ em { font-style: normal; }
   stroke-width: 1.5;
   stroke-dasharray: 4 4;
 }
+/* 빨간 바탕 위 반전 버튼: 크림 바탕 + --apple 글자, 안쪽 3px --apple 박음질 (헤더 CTA를 뒤집은 모양) */
+.btn--invert {
+  position: relative;
+  background: var(--cream);
+  color: var(--apple);
+}
+.btn--invert .btn-stitch rect { stroke: var(--apple); }
+.btn--invert:focus-visible { outline-color: rgba(255, 248, 238, 0.5); }
 
 /* 햄버거: 48px 크림 원 + 길이가 다른 두 줄(오른쪽 정렬) → 열리면 X */
 .menu-toggle {
@@ -355,8 +365,10 @@ em { font-style: normal; }
   align-items: center;
   padding: 4px 0;
   font-family: var(--font-display);
+  font-weight: 400;
+  font-synthesis: none; /* 히피체는 400 하나뿐: 가짜 굵게·기울임 금지 */
   font-size: var(--fs-title);
-  line-height: 1.3;
+  line-height: var(--lh-title);
   color: var(--cream);
 }
 .menu-link span {
@@ -416,10 +428,10 @@ html.is-menu-locked {
   padding-right: var(--scrollbar-w, 0px);
 }
 
-/* ---------- Fabric (큰 빨간 면: 히어로 왼쪽 · 3번 사계절 · 9번 문의 프레임) ---------- */
+/* ---------- Fabric (큰 빨간 면: 히어로 왼쪽 · 3번 사계절 · 8번 문의) ---------- */
 .hero-left::before,
 .year::before,
-#contact.frame::before {
+.contact::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -428,8 +440,9 @@ html.is-menu-locked {
   opacity: 0.5;
   pointer-events: none;
 }
-/* 세로로 긴 3번은 cover면 결이 2~3배 굵어지므로 히어로 왼쪽과 같은 결 크기(약 720px)로 반복 */
-.year::before {
+/* 3번·8번처럼 넓거나 긴 면은 cover면 결이 굵어지므로 히어로 왼쪽과 같은 결 크기(약 720px)로 반복 */
+.year::before,
+.contact::before {
   background-size: 720px auto;
   background-repeat: repeat;
   background-position: 0 0;
@@ -449,6 +462,7 @@ html.is-menu-locked {
   isolation: isolate;
   background: var(--apple);
   overflow: hidden;
+  overflow: clip; /* 면 밖(대기 중인 사과)은 절대 보이지 않게 */
   container-type: size;
 }
 
@@ -457,6 +471,8 @@ html.is-menu-locked {
 .hero-tree {
   --tree-h: min(80cqh, 100cqh - 48px, (100cqw - 40px) * 1266 / 970);
   position: absolute;
+  z-index: 2;
+  pointer-events: none; /* 투명한 부분 뒤 사과 더미 hover가 닿도록 */
   bottom: calc(var(--tree-h) * -0.04); /* 언덕 아래 둥근 끝(나무 높이의 4%)을 면 밖으로 내려 땅처럼 보이게 */
   left: calc(50% - var(--tree-h) * 485 / 1266);
   width: calc(var(--tree-h) * 970 / 1266);
@@ -515,6 +531,32 @@ html.is-menu-locked {
 .tree-apple--4 { left: 40%; top: 28.79%; width: 16%; --tilt: -3deg; --pop-delay: 1.65s; --wiggle-dur: 4.1s; --wiggle-delay: 3.4s; }
 .tree-apple--5 { left: 75%; top: 38.69%; width: 14%; --tilt: 9deg;  --pop-delay: 1.8s;  --wiggle-dur: 3.4s; --wiggle-delay: 2.9s; }
 .tree-apple--6 { left: 10.5%; top: 55.14%; width: 13%; --tilt: 6deg;  --pop-delay: 1.95s; --wiggle-dur: 3.9s; --wiggle-delay: 3.6s; }
+
+/* 사과 더미: 왼쪽 면 전체를 덮는 레이어. 레이어 순서(뒤 → 앞) = 원단 질감 → 사과 더미(z 1) → 나무(z 2) → 나무의 와펜.
+   떨어지는 사과·쌓인 사과 모두 나무 뒤라 줄기·잔디 언덕이 더미 앞에 보인다. 자리·크기는 script.js가 px로 둔다 */
+.hero-pile {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.pile-apple {
+  position: absolute;
+  transform-origin: 50% 100%;
+  rotate: var(--rot);
+  pointer-events: auto;
+}
+.is-falling .pile-apple { will-change: transform; }
+.pile-apple img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: translate 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* 쌓인 뒤 hover: 그 사과만 위로 살짝 들썩 (위쪽은 면 안이라 잘리지 않음) */
+@media (hover: hover) {
+  .hero-pile.is-settled .pile-apple:hover img { translate: 0 -10%; }
+}
 
 @keyframes tree-base-in {
   from { opacity: 0; }
@@ -599,27 +641,29 @@ html.is-menu-locked {
 }
 .hero-title {
   font-family: var(--font-display);
-  font-size: var(--fs-display);
+  font-synthesis: none; /* 히피체는 400 하나뿐: 가짜 굵게·기울임 금지 */
+  /* 두 줄 고정(nowrap): 둘째 줄(약 7.8em + 스트로크)이 오른쪽 면 안에 들어오도록 남은 폭 ÷ 8.1을 상한으로 */
+  font-size: min(var(--fs-display), (50vw - 112px) / 8.1);
   font-weight: 400;
-  line-height: 1.25;
+  line-height: 1.15;
   letter-spacing: 0;
   white-space: nowrap;
   /* 밝은 일러스트 위 가독성: 글자 바깥으로만 보이는 크림 외곽선 + 옅은 크림 번짐 한 겹.
-     stroke 0.1em 중 안쪽 절반은 fill이 덮어 바깥 약 0.05em만 보인다 */
-  -webkit-text-stroke: 0.1em var(--cream);
+     stroke 0.08em 중 안쪽 절반은 fill이 덮어 바깥 약 0.04em만 보인다 (히피체는 em이 커져 문경감홍사과 때와 같은 실제 두께) */
+  -webkit-text-stroke: 0.08em var(--cream);
   paint-order: stroke fill;
   stroke-linejoin: round;
   text-shadow: 0 0 0.25em rgba(255, 248, 238, 0.5);
 }
-/* paint-order 미지원: 외곽선 대신 8방향 크림 그림자로 같은 두께(0.05em)를 만든다 */
+/* paint-order 미지원: 외곽선 대신 8방향 크림 그림자로 같은 두께(0.04em)를 만든다 */
 @supports not (paint-order: stroke fill) {
   .hero-title {
     -webkit-text-stroke: 0;
     text-shadow:
-      0.05em 0 0 var(--cream), -0.05em 0 0 var(--cream),
-      0 0.05em 0 var(--cream), 0 -0.05em 0 var(--cream),
-      0.035em 0.035em 0 var(--cream), -0.035em 0.035em 0 var(--cream),
-      0.035em -0.035em 0 var(--cream), -0.035em -0.035em 0 var(--cream),
+      0.04em 0 0 var(--cream), -0.04em 0 0 var(--cream),
+      0 0.04em 0 var(--cream), 0 -0.04em 0 var(--cream),
+      0.028em 0.028em 0 var(--cream), -0.028em 0.028em 0 var(--cream),
+      0.028em -0.028em 0 var(--cream), -0.028em -0.028em 0 var(--cream),
       0 0 0.25em rgba(255, 248, 238, 0.5);
   }
 }
@@ -649,9 +693,9 @@ html.is-menu-locked {
   --farm-h: calc(var(--farm-w) * 676 / 1063);
   /* 가지: 위 8%·왼쪽 5%만 화면 밖으로 밀어, 줄기가 모서리에서 대각선으로 뻗어 나오는 게 보이게.
      너비는 28vw까지, 단 가지 끝(보이는 아래끝 + 흔들림 약 2.5%)과 가운데 정렬된 텍스트 사이 40px 이상이 되도록 줄인다.
-     텍스트 블록 위끝 ≈ (섹션 최소 높이 90svh − 블록 높이) / 2, 블록 높이 ≈ 타이틀 3줄(1.3) + 28px + 서브 2줄 */
+     텍스트 블록 위끝 ≈ (섹션 최소 높이 90svh − 블록 높이) / 2, 블록 높이 ≈ 타이틀 3줄(--lh-title) + 28px + 서브 2줄 */
   --branch-max: 28vw;
-  --stmt-text-top: calc((90svh - var(--fs-title) * 3.9 - 91px) / 2);
+  --stmt-text-top: calc((90svh - var(--fs-title) * var(--lh-title) * 3 - 91px) / 2);
   --branch-w: min(var(--branch-max), (var(--stmt-text-top) - 40px) / 0.6387);
   --branch-h: calc(var(--branch-w) * 585 / 877);
   --branch-shift-x: -5%;
@@ -714,22 +758,6 @@ html.is-menu-locked {
   height: auto;
   opacity: var(--farm-opacity);
   pointer-events: none;
-}
-
-/* ---------- Frame (3, 9) ---------- */
-.frame {
-  position: relative;
-  isolation: isolate;
-  padding: var(--frame);
-  background: var(--apple);
-}
-.frame-panel {
-  position: relative;
-  background: var(--cream);
-  border-radius: var(--radius-panel);
-}
-.frame .container {
-  width: min(100% - var(--gutter) * 2, var(--container));
 }
 
 /* ---------- 3. The year (동화책, StPageFlip) ---------- */
@@ -831,37 +859,35 @@ html.is-menu-locked {
   transform-origin: 45% 45%;
 }
 .page-when {
-  font: 600 var(--fs-small)/1.2 var(--font-en);
-  letter-spacing: 0.06em;
+  font: 600 17px/1.4 var(--font-body);
   color: var(--apple);
 }
 .page-title {
   margin-top: 12px;
   font-family: var(--font-display);
-  font-size: clamp(28px, 2.6vw, 40px);
+  font-synthesis: none; /* 히피체는 400 하나뿐: 가짜 굵게·기울임 금지 */
+  font-size: clamp(36px, 3.3vw, 50px);
   font-weight: 400;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 .page-do {
-  margin-top: 16px;
+  margin-top: 24px;
   font-size: var(--fs-lead);
   line-height: 1.75;
 }
-/* 농부의 한마디: 왼쪽 --apple 세로선 */
+/* 선 없이 여백과 글자 스타일로만 구분: 농부의 한마디는 옅은 색, 결과 문장은 --apple 굵게 */
 .page-quote {
-  margin-top: 20px;
-  padding-left: 14px;
-  border-left: 3px solid var(--apple);
-  font-size: var(--fs-body);
+  margin-top: 28px;
+  font-size: 17px;
   line-height: 1.7;
   color: var(--ink-soft);
 }
 .page-result {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1.5px dashed var(--ink-faint);
-  font-size: var(--fs-lead);
+  margin-top: 36px;
+  font-size: 19px;
   font-weight: 700;
+  line-height: 1.5;
+  color: var(--apple);
 }
 
 /* ---------- 앞·뒤표지: 따뜻한 갈색 천 하드커버, 솜이 든 듯 도톰하게 (차분하게) ---------- */
@@ -964,12 +990,13 @@ html.is-menu-locked {
 .book { container-type: inline-size; }
 @container (max-width: 900px) {
   .page-content { padding: 28px; }
-  .page-title { font-size: 26px; }
-  .page-do, .page-result { font-size: var(--fs-body); line-height: 1.65; }
+  .page-title { font-size: 33px; }
+  .page-do { font-size: var(--fs-body); line-height: 1.65; }
+  .page-result { font-size: 17px; }
   .page-quote { font-size: var(--fs-small); }
   .page-do { margin-top: 10px; }
   .page-quote { margin-top: 14px; }
-  .page-result { margin-top: 16px; padding-top: 14px; }
+  .page-result { margin-top: 20px; }
 }
 
 /* ---------- 책 모드 (script.js가 .is-book 부여): 화면에 고정된 무대 위 한 권 ---------- */
@@ -1067,141 +1094,397 @@ html.is-menu-locked {
 }
 .js .story-figure.reveal.is-visible { transform: none; rotate: -1deg; }
 
-/* ---------- 5. Varieties ---------- */
-.variety-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+/* ---------- 5. Varieties: 사과 한 박스 ---------- */
+/* 위 이야기(--cream)·아래 약속(--cream)과 배경색 차이만으로 딱 떨어지게 구분. 선·그라디언트 없음.
+   박스 아래쪽 25%가 섹션 바닥 밖으로 잘려 나가도록 하단 패딩 0 + overflow 숨김 (히어로 나무처럼 바닥에 걸친 느낌) */
+.varieties {
+  padding-bottom: 0;
+  background: var(--cream-deep);
+  overflow: hidden;
 }
-.variety-card {
+.varieties .section-head { margin-bottom: 56px; }
+/* 박스: 화면 너비의 약 65%(1440px에서 약 940px), 최대 1040px. 카드는 박스와 같은 크기의 겹(.variety-cards) 안,
+   사과 바로 아래 박스 앞판 위에 펼쳐져 타이틀·다른 품종 사과를 가리지 않는다 */
+.crate-stage {
+  --cream-line: rgba(255, 248, 238, 0.98);
+  --crate-w: min(1040px, 100%, max(65vw, 680px));
+  position: relative;
   display: flex;
   flex-direction: column;
-  padding: 16px 16px 32px;
-  border-radius: var(--radius-card);
-  background: var(--cream-deep);
+  width: var(--crate-w);
+  margin-inline: auto;
+  /* 박스 높이(너비 × 748/1243)의 25%만큼 아래로 빼서 섹션 밖으로 잘리게 */
+  margin-bottom: calc(var(--crate-w) * -0.25 * 748 / 1243);
 }
-.variety-photo {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 4 / 3;
+.crate {
+  position: relative;
+  aspect-ratio: 1243 / 748;
 }
-.variety-apple {
+.crate-img,
+.crate-apple-cut img {
+  position: absolute;
+  inset: 0;
   display: block;
-  width: 62%;
-  aspect-ratio: 1;
+  width: 100%;
+  height: 100%;
+}
+/* 품종 사과: 박스 전체 크기의 겹을 사과 모양으로 오려 원본과 픽셀이 같은 자리에 붙인다.
+   button 자체는 박스 전체를 덮으므로 클릭은 오려 낸 모양(.crate-apple-cut)에서만 받는다 */
+.crate-apple {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: none;
+  transform-origin: var(--cx) var(--cy);
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+.crate-apple:focus { outline: none; }
+.crate-apple-glow,
+.crate-apple-body {
+  position: absolute;
+  inset: 0;
+}
+.crate-apple-cut {
+  position: absolute;
+  inset: 0;
+  clip-path: var(--clip);
+  pointer-events: auto;
+}
+/* 크림 테두리 3px: 상하좌우 drop-shadow를 겹쳐 외곽선처럼. 마지막 한 겹은 떠오를 때의 그림자 자리 */
+.crate-apple-body {
+  filter:
+    drop-shadow(3px 0 0 var(--cream-line)) drop-shadow(-3px 0 0 var(--cream-line))
+    drop-shadow(0 3px 0 var(--cream-line)) drop-shadow(0 -3px 0 var(--cream-line))
+    drop-shadow(0 0 0 rgba(43, 29, 26, 0));
+  transition: filter 0.35s ease, opacity 0.35s ease;
+}
+/* 바깥 크림 번짐: 3초 주기로 살짝 밝아졌다 어두워짐 (사과는 그대로, 번짐 겹의 opacity만) */
+.crate-apple-glow {
+  filter: drop-shadow(0 0 12px rgba(255, 248, 238, 1)) drop-shadow(0 0 5px rgba(255, 248, 238, 1));
+  animation: crate-breathe 3s ease-in-out infinite;
+  transition: opacity 0.35s ease;
+}
+.crate-apple:nth-of-type(2) .crate-apple-glow { animation-delay: -1s; }
+.crate-apple:nth-of-type(3) .crate-apple-glow { animation-delay: -2s; }
+@keyframes crate-breathe {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+/* 펼친 사과: 제자리에서 8px 떠오르며 1.12배 + 아래 부드러운 그림자 */
+.crate-apple.is-open {
+  z-index: 2;
+  transform: translateY(-8px) scale(1.12);
+}
+.crate-apple.is-open .crate-apple-body {
+  filter:
+    drop-shadow(3px 0 0 var(--cream-line)) drop-shadow(-3px 0 0 var(--cream-line))
+    drop-shadow(0 3px 0 var(--cream-line)) drop-shadow(0 -3px 0 var(--cream-line))
+    drop-shadow(0 14px 12px rgba(43, 29, 26, 0.3));
+}
+.crate-apple.is-open .crate-apple-glow { animation: none; opacity: 0.6; }
+/* 다른 사과가 펼쳐진 동안 나머지 두 사과의 테두리는 흐리게 */
+.crate.has-open .crate-apple:not(.is-open) .crate-apple-glow { animation: none; opacity: 0; }
+.crate.has-open .crate-apple:not(.is-open) .crate-apple-body {
+  filter:
+    drop-shadow(3px 0 0 rgba(255, 248, 238, 0.25)) drop-shadow(-3px 0 0 rgba(255, 248, 238, 0.25))
+    drop-shadow(0 3px 0 rgba(255, 248, 238, 0.25)) drop-shadow(0 -3px 0 rgba(255, 248, 238, 0.25))
+    drop-shadow(0 0 0 rgba(43, 29, 26, 0));
+}
+/* 키보드 포커스: 크림 테두리 바깥에 --apple 한 겹 */
+.crate-apple:focus-visible .crate-apple-body {
+  filter:
+    drop-shadow(3px 0 0 var(--cream-line)) drop-shadow(-3px 0 0 var(--cream-line))
+    drop-shadow(0 3px 0 var(--cream-line)) drop-shadow(0 -3px 0 var(--cream-line))
+    drop-shadow(0 0 2.5px var(--apple));
+}
+
+/* 설명 카드 자리. 박스 아래쪽은 섹션 밖으로 잘리므로 카드는 사과 옆이나 위에만 둔다.
+   - 1360px 이상: 박스와 같은 크기의 겹 안, 사과 세로 중심(--cy)에 맞춰 옆 빈 공간 — 홍로는 왼쪽, 시나노골드·부사는 부사 오른쪽(--edge)
+   - 그보다 좁으면: 박스 위 한 자리 (세 장을 같은 칸에 겹쳐 높이가 튀지 않게) */
+.variety-cards {
+  order: -1;
+  display: grid;
+  justify-items: center;
+  margin-bottom: 24px;
+  pointer-events: none;
+}
+.variety-card {
+  position: relative;
+  grid-area: 1 / 1;
+  width: min(320px, 100%);
+  filter: drop-shadow(0 10px 18px rgba(43, 29, 26, 0.12)) drop-shadow(0 2px 4px rgba(43, 29, 26, 0.08));
+  visibility: hidden;
+  transition: visibility 0s 0.32s;
+}
+@media (min-width: 1360px) {
+  .variety-cards {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    aspect-ratio: 1243 / 748;
+    margin: 0;
+  }
+  .variety-card {
+    position: absolute;
+    top: var(--cy);
+    width: 320px;
+    translate: 0 -50%;
+  }
+  .variety-card--left { right: calc(100% - var(--edge) + 24px); }
+  .variety-card--right { left: calc(var(--edge) + 24px); }
+}
+/* "사라락": 카드 전체(틀 + 내용)를 clip-path로 위에서 아래로 펼치고, 닫을 때도 전체가 한 번에 위로 접힌다.
+   내용은 열릴 때만 한 줄씩 페이드업하고, 닫히는 동안에는 그대로 보이다가 다 접힌 뒤에 초기화 → 빈 틀이 보이지 않는다 */
+.variety-paper {
+  padding: 22px 24px 24px;
+  border-radius: 16px;
+  background: var(--cream);
+  clip-path: inset(0 0 100% 0 round 16px);
+  transition: clip-path 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.variety-paper > * {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0s 0.32s, transform 0s 0.32s;
+}
+.variety-card.is-open {
+  visibility: visible;
+  transition: visibility 0s;
+}
+.variety-card.is-open .variety-paper {
+  clip-path: inset(0 0 0 0 round 16px);
+  transition-duration: 0.5s;
+}
+.variety-card.is-open .variety-paper > * {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.35s ease calc(0.12s + var(--i) * 50ms), transform 0.35s var(--ease-out) calc(0.12s + var(--i) * 50ms);
 }
 .variety-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 16px;
-  padding: 0 16px;
+}
+.variety-name {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-synthesis: none;
+  font-size: 28px;
+  line-height: 1.2;
 }
 .variety-month {
-  font-size: var(--fs-lead);
+  font-size: 17px;
   font-weight: 700;
   color: var(--apple);
   white-space: nowrap;
 }
 .variety-taste {
-  flex: 1;
   margin-top: 12px;
-  padding: 0 16px;
+  font-size: var(--fs-body);
+  line-height: 1.65;
   color: var(--ink-soft);
 }
 .variety-use {
-  display: flex;
-  gap: 12px;
-  margin: 24px 16px 0;
-  padding-top: 20px;
-  border-top: 1.5px dashed var(--ink-faint);
+  margin-top: 14px;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  font-weight: 600;
 }
-.variety-use dt {
-  flex: none;
-  font-size: var(--fs-small);
-  line-height: calc(var(--fs-body) * 1.75);
+.variety-use span {
+  margin-right: 10px;
+  white-space: nowrap;
+  font-size: var(--fs-body);
+  font-weight: 400;
   color: var(--ink-soft);
 }
-.variety-use dd { font-weight: 600; }
 
-/* ---------- 6. Banner ---------- */
-.banner {
-  display: grid;
-  gap: 48px;
-  overflow: hidden;
-}
-.banner-text { text-align: center; }
-
-.icon-row { overflow: hidden; }
-.icon-track {
-  display: flex;
-  width: max-content;
-  animation: marquee 40s linear infinite;
-}
-.icon-row--reverse .icon-track { animation-direction: reverse; }
-.icon-group {
-  display: flex;
-  flex: none;
-  gap: 56px;
-  padding-right: 56px;
-}
-.icon-group svg {
-  width: 40px;
-  height: 40px;
-  color: var(--apple);
-}
-
+/* 흐르는 줄(후기)에서 쓰는 이동 */
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
 
-/* ---------- 7. Promise ---------- */
-.promise { background: var(--cream-deep); }
-.stamps {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 32px;
-  justify-items: center;
-}
-.stamp {
+/* ---------- 6. Promise ---------- */
+/* 배경은 기본 --cream (위 품종 --cream-deep, 아래 후기 --cream-deep과 번갈아) */
+.tag-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+/* 책상 위에 놓인 크라프트지 꼬리표 4장을 위에서 본 구도. 도장(.stamp-tool)은 같은 무대 안, 항상 꼬리표·자국 위 */
+.tags-stage {
+  --tag-w: 240px;
+  --tool-w: 112px;
   position: relative;
+  padding: 72px 0 96px; /* 위: 꼬리표 끈이 올라갈 자리 / 아래: 다 찍고 놓인 도장 자리 */
+}
+.tags {
+  display: flex;
+  justify-content: center;
+  gap: clamp(24px, 3.4vw, 48px);
+}
+.tag {
+  position: relative;
+  width: var(--tag-w);
+  aspect-ratio: 3 / 4;
+  rotate: var(--r, 0deg);
+  translate: 0 var(--y, 0px);
+  container-type: inline-size;
+}
+/* 구멍에서 위로 휘어 올라가는 면끈 (끝은 위로 옅어지며 사라짐) */
+.tag-string {
+  position: absolute;
+  left: calc(50% - 12.5cqw);
+  bottom: calc(100% - 13cqw);
+  width: 25cqw;
+  height: 37.5cqw;
+  overflow: visible;
+  transform-origin: 50% 96%;
+  pointer-events: none;
+}
+.tag-string path {
+  fill: none;
+  stroke: url(#string-fade);
+  stroke-width: 2;
+  stroke-linecap: round;
+  filter: drop-shadow(0 1px 0 rgba(90, 60, 30, 0.18));
+}
+/* 얕고 부드러운 그림자 (위에서 본 구도) — 잘린 종이 모양을 따라가도록 바깥 겹에 */
+.tag-body {
+  position: absolute;
+  inset: 0;
+  filter: drop-shadow(0 2px 3px rgba(60, 38, 20, 0.16)) drop-shadow(0 6px 10px rgba(60, 38, 20, 0.08));
+  transition: translate 0.25s var(--ease-out), filter 0.25s ease;
+}
+.tag-paper {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: clamp(220px, 18vw, 250px);
-  aspect-ratio: 1;
-  padding: 32px;
-  border: 2px dashed var(--apple);
-  border-radius: 50%;
-  text-align: center;
-  rotate: var(--r, 0deg);
+  background: #CFA77C;
+  /* 위쪽 두 모서리를 사선으로 자른 꼬리표 */
+  clip-path: polygon(17% 0, 83% 0, 100% 12.75%, 100% 100%, 0 100%, 0 12.75%);
+  filter: url(#tag-rough);
 }
-.stamp::before {
-  content: '';
+/* 종이 섬유 질감 (아주 옅게) */
+.tag-paper::after {
+  content: "";
   position: absolute;
-  inset: 10px;
-  border: 1.5px solid var(--apple);
-  border-radius: 50%;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.36  0 0 0 0 0.25  0 0 0 0 0.14  0 0 0 0.55 0'/%3E%3C/filter%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.5' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.42  0 0 0 0 0.3  0 0 0 0 0.18  0 0 0 0.7 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E") 0 0 / 180px 180px;
+  mix-blend-mode: multiply;
   opacity: 0.35;
+  pointer-events: none;
 }
-.stamp-big {
-  font: 800 40px/1.05 var(--font-en);
-  letter-spacing: 0.01em;
+/* 끈 구멍: 지름 14px + 바깥 연한 보강 링 */
+.tag-hole {
+  position: absolute;
+  top: 7.5cqw;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: var(--cream);
+  box-shadow: inset 0 1px 2px rgba(60, 38, 20, 0.35), 0 0 0 6px #DCBB93, 0 0 0 7px rgba(120, 84, 48, 0.18);
+  z-index: 1;
+}
+/* 도장 자국: 이중 원 + 큰 숫자, 꼬리표 너비의 약 70%. 잉크는 부드럽게 (--apple, 0.85, multiply, 약한 질감) */
+.tag-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 70%;
+  aspect-ratio: 1;
+  margin-top: 19cqw;
   color: var(--apple);
+  opacity: 0.85;
+  mix-blend-mode: multiply;
 }
-.stamp-big--since { font-size: 32px; }
-.stamp-small {
-  font-size: var(--fs-small);
+.tag-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+.tag-big {
+  position: relative;
+  font: 800 13cqw/1.05 var(--font-en);
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+.tag--since .tag-big { font-size: 10cqw; }
+.tag-text {
+  position: relative;
+  margin: auto 9% 10cqw;
+  font-size: var(--fs-body);
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.45;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--ink);
+}
+/* hover: 그 꼬리표만 2px 들리고 그림자가 조금 커지며 끈이 살짝 흔들림 */
+@media (hover: hover) {
+  .tag:hover .tag-body {
+    translate: 0 -2px;
+    filter: drop-shadow(0 4px 5px rgba(60, 38, 20, 0.18)) drop-shadow(0 10px 16px rgba(60, 38, 20, 0.1));
+  }
+  .tag:hover .tag-string { animation: string-sway 0.9s ease-in-out; }
+}
+@keyframes string-sway {
+  0%, 100% { rotate: 0deg; }
+  30% { rotate: 3deg; }
+  65% { rotate: -2deg; }
 }
 
-/* ---------- 8. Reviews ---------- */
-.reviews { overflow: hidden; }
+/* 나무 도장: 고무 바닥 중심(이미지의 49.9% · 81.2%)이 찍히는 기준점. 위치는 script.js가 x·y로 옮긴다 */
+.stamp-tool {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  width: var(--tool-w);
+  transform-origin: 49.9% 81.2%;
+  visibility: hidden;
+  pointer-events: none;
+}
+.stamp-tool img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: translate 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.stamp-tool.is-placed { visibility: visible; }
+.stamp-tool.is-resting { pointer-events: auto; }
+/* 놓인 도장 hover: 살짝 들썩 (위쪽으로라 잘리지 않음) */
+@media (hover: hover) {
+  .stamp-tool.is-resting:hover img { translate: 0 -6px; }
+}
+/* 도장 그림자: 바닥 기준점 아래 타원. 떠 있을 땐 크고 흐릿하게, 닿을 땐 작고 진하게 (script.js) */
+.stamp-shadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  width: calc(var(--tool-w) * 0.95);
+  height: calc(var(--tool-w) * 0.5);
+  margin: calc(var(--tool-w) * -0.25) 0 0 calc(var(--tool-w) * -0.475);
+  border-radius: 50%;
+  background: rgb(43, 29, 26);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- 7. Reviews ---------- */
+.reviews {
+  overflow: hidden;
+  background: var(--cream-deep);
+}
 .review-marquee {
   overflow: hidden;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
@@ -1219,35 +1502,142 @@ html.is-menu-locked {
   gap: 24px;
   padding-right: 24px;
 }
+/* 박음질 패치 메모: 크림 카드, 10px 안쪽 박음질, 카드마다 각도·세로 위치 조금씩 다르게 */
+.review-group { padding-block: 16px; } /* 기울기·들썩임이 잘리지 않게 */
 .review-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 28px;
+  gap: 24px;
   width: 380px;
-  padding: 36px 32px 32px;
-  border-radius: var(--radius-card);
-  background: var(--cream-deep);
+  padding: 30px 32px 30px;
+  border-radius: 18px;
+  background: var(--cream);
+  box-shadow: 0 1px 2px rgba(60, 38, 20, 0.06), 0 4px 10px rgba(60, 38, 20, 0.05);
+  rotate: var(--r, 0deg);
+  translate: 0 var(--y, 0px);
+  transition: rotate 0.35s var(--ease-out), translate 0.35s var(--ease-out), box-shadow 0.35s ease;
+}
+/* 가장자리 10px 안쪽 박음질 (1.5px, --apple-soft, 6 5) — 카드·접수 메시지 공통 */
+.card-stitch {
+  position: absolute;
+  inset: 10px;
+  width: calc(100% - 20px);
+  height: calc(100% - 20px);
+  overflow: visible;
+  pointer-events: none;
+}
+.card-stitch rect {
+  fill: none;
+  stroke: var(--apple-soft);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+.review-mark {
+  display: block;
+  height: 34px;
+  margin: -4px 0 -8px -2px;
+  font: 400 64px/1 var(--font-display); /* 히피체 따옴표는 글리프가 작아 64px로 약 48px 크기로 보이게 */
+  font-synthesis: none;
+  color: var(--apple);
 }
 .review-quote {
-  font-size: var(--fs-lead);
+  flex: 1;
+  font-size: var(--fs-body);
   line-height: 1.7;
+  color: var(--ink);
 }
 .review-from {
-  font-size: var(--fs-small);
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
   color: var(--ink-soft);
 }
+.review-from img {
+  flex: none;
+  width: 22px;
+  height: auto;
+}
+/* hover: 흐름이 멈추고 그 카드만 반듯하게 펴지며 3px 들림 */
+@media (hover: hover) {
+  .review-card:hover {
+    rotate: 0deg;
+    translate: 0 calc(var(--y, 0px) - 3px);
+    box-shadow: 0 2px 4px rgba(60, 38, 20, 0.08), 0 10px 20px rgba(60, 38, 20, 0.08);
+  }
+}
 
-/* ---------- 9. Contact ---------- */
+/* ---------- 8. Contact ---------- */
+/* 섹션 전체 원단 빨강 (히어로 왼쪽과 같은 값: --apple + 질감 multiply 0.5). 위 후기 --cream-deep · 아래 푸터 --cream과 구분 */
+.contact {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--apple);
+  color: var(--cream);
+}
 .contact-grid {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
   gap: 80px;
   align-items: start;
 }
-.contact-intro .section-sub { margin-top: 24px; }
+.contact-intro .section-sub {
+  margin-top: 24px;
+  color: rgba(255, 248, 238, 0.85);
+}
+.contact-line {
+  margin-top: 16px;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: rgba(255, 248, 238, 0.85);
+}
 
+/* 왼쪽 아래 바닥의 사과나무: 히어로처럼 언덕 아래 둥근 끝(나무 높이 4%)을 섹션 밖으로 내려 바닥에 붙인다. 높이는 섹션의 약 55%.
+   글과 겹치지 않도록 섹션 높이에서 글 블록 아래(--intro-bottom, script.js)까지를 넘지 않게 */
+.contact-tree {
+  --h: min(55%, 100% - var(--intro-bottom, 0px) - 32px);
+  position: absolute;
+  left: max(var(--gutter), (100% - var(--container)) / 2 + 24px);
+  bottom: calc(var(--h) * -0.04);
+  height: var(--h);
+  aspect-ratio: 970 / 1266;
+  pointer-events: none;
+}
+.contact-tree-grow,
+.contact-tree-grow img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.contact-tree-grow { transform-origin: 50% 100%; }
+.contact-apple {
+  position: absolute;
+  transform-origin: 50% 15%;
+}
+.contact-apple img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform: rotate(var(--tilt));
+}
+.contact-apple--1 { left: 30.5%; top: 7.24%; width: 15%; --tilt: 5deg; --pop: 0.6s; }
+.contact-apple--2 { left: 58.5%; top: 14.14%; width: 13%; --tilt: -4deg; --pop: 0.75s; }
+.contact-apple--3 { left: 11%; top: 34.69%; width: 14%; --tilt: -8deg; --pop: 0.9s; }
+.contact-apple--4 { left: 75%; top: 38.69%; width: 14%; --tilt: 9deg; --pop: 1.05s; }
+/* 섹션에 들어오면 (script.js가 .is-grown) 0.7초 자라고 사과가 0.15초 간격으로 톡톡 — 약 1.4초 */
+.js .contact-tree:not(.is-grown) .contact-tree-grow { visibility: hidden; }
+.js .contact-tree:not(.is-grown) .contact-apple { visibility: hidden; }
+.contact-tree.is-grown .contact-tree-grow { animation: tree-grow 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+.contact-tree.is-grown .contact-apple img { animation: apple-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) var(--pop) backwards; }
+
+/* 폼: 박음질 패치 입력칸 */
 .contact-form {
   display: grid;
   gap: 20px;
@@ -1260,61 +1650,81 @@ html.is-menu-locked {
   gap: 16px;
 }
 .field label {
-  font-size: var(--fs-small);
+  font-size: 16px;
   font-weight: 600;
+  color: var(--cream);
 }
 .field input,
 .field select,
 .field textarea {
   width: 100%;
   min-height: 56px;
-  padding: 14px 18px;
-  border: 1.5px solid var(--ink-faint);
-  border-radius: 12px;
-  background: #fff;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 14px;
+  background-color: var(--cream);
   color: var(--ink);
   font: 400 var(--fs-body)/1.5 var(--font-body);
-  transition: border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+  /* 안쪽 6px 박음질 */
+  outline: 1.5px dashed rgba(43, 29, 26, 0.3);
+  outline-offset: -6px;
+  transition: outline-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
 }
-.field textarea { resize: vertical; min-height: 128px; }
+/* 세로로만 늘어나게: 기본 핸들은 숨기고 내용에 맞춰 자동으로 늘어난다 (script.js) */
+.field textarea {
+  min-height: 132px;
+  max-height: 320px;
+  resize: none;
+  overflow-y: auto;
+}
 .field select {
   appearance: none;
-  padding-right: 48px;
+  -webkit-appearance: none;
+  padding-right: 52px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%232B1D1A' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 20px center;
+  background-position: right 22px center;
   cursor: pointer;
 }
-.field ::placeholder { color: var(--ink-faint); opacity: 1; }
+.field select::-ms-expand { display: none; }
+.field ::placeholder { color: var(--ink-soft); opacity: 1; }
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
-  outline: none;
-  border-color: var(--apple);
-  box-shadow: 0 0 0 4px var(--apple-soft);
+  outline-color: var(--apple);
+  box-shadow: 0 0 0 3px rgba(255, 248, 238, 0.4);
 }
 .contact-form .btn {
   justify-self: start;
   margin-top: 8px;
 }
 
+/* 접수 메시지: 폼 자리에 박음질 크림 카드, 앞에 와펜 사과가 톡 */
 .contact-done {
   display: grid;
+  align-content: center;
   justify-items: start;
   gap: 20px;
-  padding: 48px 40px;
-  border-radius: var(--radius-card);
-  background: var(--cream-deep);
-  font-family: var(--font-display);
-  font-size: clamp(22px, 2vw, 28px);
-  line-height: 1.5;
+  padding: 44px 40px;
+  border-radius: 18px;
+  background: var(--cream);
+  color: var(--ink);
+  position: relative;
   outline: none;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-synthesis: none; /* 히피체는 400 하나뿐: 가짜 굵게·기울임 금지 */
+  font-size: clamp(28px, 2.5vw, 36px);
+  line-height: 1.4;
 }
 .contact-done[hidden] { display: none; }
-.contact-done-icon {
-  width: 48px;
-  height: 48px;
-  color: var(--apple);
+.contact-done > :not(.card-stitch) { position: relative; }
+.contact-done-patch {
+  width: 56px;
+  height: auto;
+  --tilt: -8deg;
+  transform: rotate(var(--tilt));
+  animation: apple-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards;
 }
 
 /* ---------- Footer ---------- */
@@ -1379,7 +1789,8 @@ html.is-menu-locked {
 /* ---------- Responsive (다음 단계에서 다듬음) ---------- */
 @media (max-width: 1024px) {
   :root { --gutter: 40px; }
-  .stamps { grid-template-columns: repeat(2, 1fr); row-gap: 48px; }
+  .tags { flex-wrap: wrap; max-width: calc(var(--tag-w) * 2 + 120px); margin-inline: auto; row-gap: 88px; }
+  .tags-stage { padding-bottom: calc(var(--tool-w) * 1.9 + 40px); } /* 꼬리표 아래 가운데에 놓인 도장 자리 */
   .story-grid, .contact-grid { grid-template-columns: 1fr; gap: 56px; }
 }
 
@@ -1391,7 +1802,6 @@ html.is-menu-locked {
   :root {
     --gutter: 20px;
     --section-y: 72px;
-    --frame: 12px;
   }
   /* 헤더 64px: 로고 + 햄버거만 (납품 문의는 메뉴 안에) */
   .site-header { height: 64px; padding: 0 20px; }
@@ -1418,7 +1828,14 @@ html.is-menu-locked {
   .hero { grid-template-columns: 1fr; grid-template-rows: 60svh 40svh; height: auto; min-height: 0; }
   .hero-right { order: -1; }
   .hero-copy { left: 20px; right: 20px; bottom: 32px; }
-  .variety-grid, .stamps { grid-template-columns: 1fr; }
+  .hero-title { font-size: min(var(--fs-display), (100vw - 40px) / 8.1); }
+  /* 약속: 꼬리표 2×2, 도장 축소 */
+  .tags-stage { --tag-w: min(160px, 42vw); --tool-w: 64px; padding-top: 56px; }
+  .tags { column-gap: 16px; row-gap: 72px; max-width: calc(var(--tag-w) * 2 + 16px); }
+  .tag-text { margin-inline: 7%; line-height: 1.35; }
+  /* 품종: 박스는 화면 너비로, 카드는 박스 위 한 자리에 화면 너비로 */
+  .crate-stage { --crate-w: 100%; }
+  .variety-card { width: 100%; }
   /* 3번: 한 페이지씩 넘기는 책 (라이브러리 portrait 모드) — 그림 한 장, 글 한 장씩 이어진다 */
   .book {
     --book-w: min(100vw - var(--gutter) * 2, (100svh - var(--header-h) - 72px) * 0.775);
@@ -1430,13 +1847,25 @@ html.is-menu-locked {
   .book-flip > .page[data-density="hard"] { width: 100%; }
   .page-title { margin-top: 8px; }
   .page-do { margin-top: 10px; font-size: var(--fs-body); line-height: 1.7; }
-  .page-result { margin-top: 16px; padding-top: 14px; font-size: var(--fs-body); }
+  .page-result { margin-top: 20px; font-size: 17px; }
   .cover-stitch { inset: 10px; width: calc(100% - 20px); height: calc(100% - 20px); }
   .cover-title { margin-top: 24px; }
   .cover-sub { margin-top: 14px; }
   .page-hint { right: 30px; bottom: 24px; width: 28px; }
   .field-row { grid-template-columns: 1fr; }
   .review-card { width: 300px; }
+  /* 문의: 글 → 폼 → 나무(작게, 섹션 바닥에 붙여서) */
+  .contact { padding-bottom: 0; }
+  .contact-tree {
+    --h: 220px;
+    position: relative;
+    left: auto;
+    bottom: auto;
+    display: block;
+    margin: 48px 0 calc(var(--h) * -0.04) var(--gutter);
+  }
+  .field input,
+  .field select { min-height: 52px; }
   .story-figure { width: min(90vw, 100%); max-width: none; }
 }
 

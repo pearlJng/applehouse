@@ -19,15 +19,6 @@
 </head>
 <body>
 
-  <!-- 사과 아이콘 (배너·결론 문장에서 재사용) -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <symbol id="i-apple" viewBox="0 0 40 40">
-      <path fill="currentColor" d="M20 13.2c-2.9-2.6-8.6-3-11.3 1.4-3 4.9-.9 13.4 3.2 17.7 2 2.1 4.1 2.7 6 1.8 1.4-.6 2.8-.6 4.2 0 1.9.9 4 .3 6-1.8 4.1-4.3 6.2-12.8 3.2-17.7-2.7-4.4-8.4-4-11.3-1.4z"/>
-      <path fill="none" stroke="#2B1D1A" stroke-width="1.8" stroke-linecap="round" d="M20 13.4c0-2.8.8-5.2 2.6-7"/>
-      <path fill="#3F6B3A" d="M22.4 8.6c1.2-3.2 4.4-4.6 7.8-3.9-.9 3.3-4.3 5.1-7.8 3.9z"/>
-    </symbol>
-  </svg>
-
   <!-- Header: 크림 종이 바 + 박음질 점선, 와펜 로고 / 납품 문의 · 햄버거 -->
   <header class="site-header">
     <div class="header-inner">
@@ -74,6 +65,8 @@
     <!-- 1. 히어로 -->
     <section class="hero" aria-label="애플하우스 소개">
       <div class="hero-left">
+        <!-- 사과 더미: 떨어지는 사과와 쌓인 사과 모두 나무 뒤 레이어. script.js가 와펜을 채운다 (나무 흔들림과 분리하려고 .hero-tree 밖) -->
+        <div class="hero-pile" aria-hidden="true"></div>
         <div class="hero-tree" aria-hidden="true">
           <div class="tree-grow">
             <img class="tree-img" src="asset/apple-tree.webp" alt="" width="970" height="1266">
@@ -144,7 +137,7 @@
             </div>
             <div class="page page--right">
               <div class="page-content page-content--right">
-                <p class="page-when">SPRING · 04—05</p>
+                <p class="page-when">첫 번째 계절, 봄</p>
                 <h3 class="page-title">꽃을 솎아요</h3>
                 <p class="page-do">사월 말, 과수원이 하얗게 피어나면 가장 바빠져요. 한 꽃눈에서 피는 다섯 송이 중 가운데 가장 큰 꽃 하나만 남기고, 나머지는 손으로 하나하나 따 줘요.</p>
                 <p class="page-quote">“꽃을 딸 때가 제일 아까워요. 그래도 이 손이 가을의 맛을 정해요.”</p>
@@ -159,9 +152,9 @@
             </div>
             <div class="page page--right">
               <div class="page-content page-content--right">
-                <p class="page-when">SUMMER · 06—08</p>
+                <p class="page-when">두 번째 계절, 여름</p>
                 <h3 class="page-title">열매를 솎아요</h3>
-                <p class="page-do">콩알만 한 열매가 맺히면 다시 한 번 골라요. 모양이 고르고 햇볕을 잘 받을 자리의 열매만 남겨, 한 가지에 한 알씩 키워요. 장마가 지나면 풀을 베어 나무가 숨 쉴 틈을 만들어 줘요.</p>
+                <p class="page-do">유월이 되어 콩알만 한 열매가 맺히면 다시 한 번 골라요. 모양이 고르고 햇볕을 잘 받을 자리의 열매만 남겨, 한 가지에 한 알씩 키워요. 장마가 지나면 풀을 베어 나무가 숨 쉴 틈을 만들어 줘요.</p>
                 <p class="page-quote">“여름엔 하루에도 몇 번씩 나무 사이를 걸어요. 나무마다 표정이 달라요.”</p>
                 <p class="page-result">크기와 맛이 고르게 자라요.</p>
               </div>
@@ -174,9 +167,9 @@
             </div>
             <div class="page page--right">
               <div class="page-content page-content--right">
-                <p class="page-when">AUTUMN · 09—11</p>
+                <p class="page-when">세 번째 계절, 가을</p>
                 <h3 class="page-title">손으로 따요</h3>
-                <p class="page-do">수확을 앞두고 나무 아래 은빛 반사 필름을 깔아요. 아래에서 올라온 햇빛이 사과 밑동까지 고루 붉게 물들여요. 다 익은 사과는 한 알씩 손으로 따서 바로 그늘에서 식혀요.</p>
+                <p class="page-do">구월, 수확을 앞두고 나무 아래 은빛 반사 필름을 깔아요. 아래에서 올라온 햇빛이 사과 밑동까지 고루 붉게 물들여요. 다 익은 사과는 한 알씩 손으로 따서 바로 그늘에서 식혀요.</p>
                 <p class="page-quote">“사과는 작은 상처에도 금방 상해요. 그래서 끝까지 손으로 따요.”</p>
                 <p class="page-result">상처 없이, 가장 맛있을 때 거둬요.</p>
               </div>
@@ -189,9 +182,9 @@
             </div>
             <div class="page page--right">
               <div class="page-content page-content--right">
-                <p class="page-when">WINTER · 12—02</p>
+                <p class="page-when">네 번째 계절, 겨울</p>
                 <h3 class="page-title">가지를 쳐요</h3>
-                <p class="page-do">잎이 다 지고 나무가 쉬는 겨울, 저희는 내년을 준비해요. 안쪽으로 엉킨 가지와 너무 높이 자란 가지를 잘라 햇빛과 바람이 고루 드나들게 해요.</p>
+                <p class="page-do">십이월, 잎이 다 지고 나무가 쉬는 겨울이면 저희는 내년을 준비해요. 안쪽으로 엉킨 가지와 너무 높이 자란 가지를 잘라 햇빛과 바람이 고루 드나들게 해요.</p>
                 <p class="page-quote">“겨울에 자른 가지 하나가 내년 사과의 얼굴을 바꿔요.”</p>
                 <p class="page-result">다음 해의 한 알이 준비돼요.</p>
               </div>
@@ -214,7 +207,7 @@
         <div class="story-text">
           <h2 class="section-title reveal">1968년,<br>사과나무 한 그루에서<br>시작했어요</h2>
           <div class="story-body reveal" style="--d:1">
-            <p>할아버지는 청송 산자락에 사과나무를 처음 심으셨어요.<br>낮에는 볕이 뜨겁고 밤에는 서늘한 이 땅이, 사과를 단단하고 달게 만든다는 걸 아셨거든요.</p>
+            <p>할아버지는 청송 산자락에 사과나무를 처음 심으셨어요.<br>낮에는 볕이 뜨겁고 밤에는 서늘한 이 땅이,<br> 사과를 단단하고 달게 만든다는 걸 아셨거든요.</p>
             <p>아버지는 그 나무 옆에 나무를 더 심으셨고,<br>저는 지금 그 나무들 사이에서 일 년을 보냅니다.</p>
             <p>3대가 지나는 동안 바뀐 것도 많지만,<br>꽃을 솎고, 열매를 고르고, 손으로 따는 일만은 그대로예요.<br>조금 느려도, 그게 한 알을 제대로 키우는 방법이라고 배웠으니까요.</p>
           </div>
@@ -234,89 +227,171 @@
           <p class="section-sub reveal" style="--d:1">가을 석 달 동안, 세 가지 사과를 차례로 거둬요.</p>
         </header>
 
-        <ul class="variety-grid">
-          <li class="variety-card reveal" style="--d:0">
-            <figure class="variety-photo"><span class="variety-apple ph ph--apple" data-file="apple-01.webp"><img src="asset/apple-01.webp" alt="홍로 사과" loading="lazy" onerror="this.hidden=true"></span></figure>
-            <div class="variety-head">
-              <h3 class="card-title">홍로</h3>
-              <p class="variety-month">9월</p>
-            </div>
-            <p class="variety-taste">새콤함이 적고 단맛이 먼저 와요. 가을을 가장 먼저 여는 사과예요.</p>
-            <dl class="variety-use"><dt>어울리는 곳</dt><dd>생과 디저트, 추석 선물</dd></dl>
-          </li>
-          <li class="variety-card reveal" style="--d:1">
-            <figure class="variety-photo"><span class="variety-apple ph ph--apple" data-file="apple-02.webp"><img src="asset/apple-02.webp" alt="시나노골드 사과" loading="lazy" onerror="this.hidden=true"></span></figure>
-            <div class="variety-head">
-              <h3 class="card-title">시나노골드</h3>
-              <p class="variety-month">10월</p>
-            </div>
-            <p class="variety-taste">노란 껍질에 새콤달콤한 맛, 향이 진해요.</p>
-            <dl class="variety-use"><dt>어울리는 곳</dt><dd>타르트, 음료, 색다른 선물</dd></dl>
-          </li>
-          <li class="variety-card reveal" style="--d:2">
-            <figure class="variety-photo"><span class="variety-apple ph ph--apple" data-file="apple-03.webp"><img src="asset/apple-03.webp" alt="부사 사과" loading="lazy" onerror="this.hidden=true"></span></figure>
-            <div class="variety-head">
-              <h3 class="card-title">부사</h3>
-              <p class="variety-month">11월</p>
-            </div>
-            <p class="variety-taste">아삭하고 과즙이 많아요. 오래 두어도 맛이 잘 유지돼요.</p>
-            <dl class="variety-use"><dt>어울리는 곳</dt><dd>베이킹, 주스, 연말 선물</dd></dl>
-          </li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- 6. 배너 -->
-    <section class="section banner" aria-label="따고, 고르고, 담아내다">
-      <div class="icon-row" aria-hidden="true">
-        <div class="icon-track">
-          <div class="icon-group">
-            <svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg>
-            <svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg>
-            <svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg>
+        <!-- 사과 한 박스: 품종 사과 3개는 같은 그림을 한 겹 더 얹어 사과 모양(polygon clip-path, 박스 그림 기준 %)으로 오려 낸 button.
+             마우스·포커스·탭 → 그 사과가 떠오르고 설명 카드가 펼쳐진다. 아무도 건드리지 않으면 script.js가 차례로 소개 -->
+        <div class="crate-stage reveal" style="--d:2">
+          <div class="crate">
+            <img class="crate-img" src="asset/apple-crate.webp" alt="나무 상자에 담긴 사과. 진한 빨강 홍로, 노란 시나노골드, 줄무늬 부사가 섞여 있다" width="1243" height="748" loading="lazy">
+            <button class="crate-apple" type="button" data-variety="hongro" aria-expanded="false" aria-controls="variety-hongro" aria-label="홍로 설명 보기" style="--cx:27.6%; --cy:31.2%; --clip:polygon(28.67% 18.78%, 27.94% 18.98%, 27.24% 19.10%, 26.54% 19.12%, 25.82% 19.07%, 25.03% 19.06%, 24.19% 19.19%, 23.32% 19.55%, 22.43% 20.16%, 21.59% 20.99%, 20.81% 21.95%, 20.13% 22.97%, 19.53% 24.03%, 19.02% 25.14%, 18.57% 26.35%, 18.19% 27.73%, 17.88% 29.27%, 17.68% 30.90%, 17.65% 32.47%, 17.82% 33.82%, 18.21% 34.83%, 18.83% 35.46%, 19.63% 35.82%, 20.54% 36.10%, 21.45% 36.50%, 22.31% 37.19%, 23.05% 38.23%, 23.68% 39.53%, 24.22% 40.87%, 24.73% 42.02%, 25.28% 42.80%, 25.93% 43.14%, 26.70% 43.12%, 27.60% 42.90%, 28.57% 42.70%, 29.58% 42.67%, 30.56% 42.86%, 31.47% 43.17%, 32.29% 43.46%, 33.04% 43.52%, 33.72% 43.23%, 34.36% 42.54%, 34.98% 41.51%, 35.58% 40.26%, 36.15% 38.92%, 36.65% 37.58%, 37.07% 36.28%, 37.37% 34.97%, 37.53% 33.60%, 37.57% 32.13%, 37.49% 30.56%, 37.30% 28.95%, 37.03% 27.38%, 36.69% 25.92%, 36.27% 24.60%, 35.78% 23.44%, 35.21% 22.39%, 34.55% 21.42%, 33.80% 20.52%, 32.97% 19.72%, 32.09% 19.09%, 31.18% 18.69%, 30.29% 18.54%, 29.45% 18.59%)">
+              <span class="crate-apple-glow" aria-hidden="true"><span class="crate-apple-cut"><img src="asset/apple-crate.webp" alt="" width="1243" height="748" loading="lazy"></span></span>
+              <span class="crate-apple-body" aria-hidden="true"><span class="crate-apple-cut"><img src="asset/apple-crate.webp" alt="" width="1243" height="748" loading="lazy"></span></span>
+            </button>
+            <button class="crate-apple" type="button" data-variety="shinano" aria-expanded="false" aria-controls="variety-shinano" aria-label="시나노골드 설명 보기" style="--cx:50.7%; --cy:32.3%; --clip:polygon(50.06% 18.02%, 49.13% 18.01%, 48.10% 18.24%, 47.03% 18.70%, 46.00% 19.36%, 45.07% 20.12%, 44.26% 20.93%, 43.57% 21.78%, 42.97% 22.70%, 42.40% 23.78%, 41.84% 25.10%, 41.29% 26.68%, 40.81% 28.43%, 40.47% 30.22%, 40.32% 31.86%, 40.44% 33.20%, 40.82% 34.16%, 41.45% 34.78%, 42.27% 35.14%, 43.19% 35.40%, 44.14% 35.68%, 45.08% 36.04%, 45.97% 36.49%, 46.81% 36.99%, 47.61% 37.51%, 48.38% 38.08%, 49.12% 38.76%, 49.84% 39.63%, 50.52% 40.76%, 51.13% 42.10%, 51.67% 43.51%, 52.14% 44.73%, 52.53% 45.50%, 52.89% 45.60%, 53.23% 44.95%, 53.60% 43.65%, 54.03% 41.96%, 54.57% 40.22%, 55.24% 38.72%, 56.04% 37.64%, 56.94% 37.01%, 57.89% 36.68%, 58.83% 36.40%, 59.66% 35.93%, 60.32% 35.12%, 60.76% 33.94%, 60.96% 32.45%, 60.95% 30.81%, 60.75% 29.18%, 60.42% 27.64%, 59.98% 26.22%, 59.47% 24.91%, 58.87% 23.66%, 58.19% 22.45%, 57.41% 21.34%, 56.55% 20.37%, 55.66% 19.64%, 54.78% 19.16%, 53.96% 18.91%, 53.25% 18.81%, 52.63% 18.74%, 52.07% 18.62%, 51.50% 18.43%, 50.84% 18.19%)">
+              <span class="crate-apple-glow" aria-hidden="true"><span class="crate-apple-cut"><img src="asset/apple-crate.webp" alt="" width="1243" height="748" loading="lazy"></span></span>
+              <span class="crate-apple-body" aria-hidden="true"><span class="crate-apple-cut"><img src="asset/apple-crate.webp" alt="" width="1243" height="748" loading="lazy"></span></span>
+            </button>
+            <button class="crate-apple" type="button" data-variety="fuji" aria-expanded="false" aria-controls="variety-fuji" aria-label="부사 설명 보기" style="--cx:73.8%; --cy:32.6%; --clip:polygon(72.77% 19.13%, 71.82% 19.36%, 70.92% 19.70%, 70.07% 20.17%, 69.29% 20.81%, 68.55% 21.60%, 67.86% 22.50%, 67.18% 23.45%, 66.51% 24.39%, 65.83% 25.31%, 65.18% 26.26%, 64.57% 27.30%, 64.06% 28.50%, 63.68% 29.90%, 63.49% 31.45%, 63.52% 33.01%, 63.77% 34.42%, 64.25% 35.53%, 64.91% 36.26%, 65.72% 36.67%, 66.62% 36.92%, 67.55% 37.25%, 68.43% 37.86%, 69.21% 38.87%, 69.88% 40.24%, 70.41% 41.80%, 70.86% 43.30%, 71.27% 44.47%, 71.72% 45.17%, 72.27% 45.38%, 72.97% 45.24%, 73.83% 44.94%, 74.81% 44.70%, 75.85% 44.63%, 76.88% 44.74%, 77.82% 44.89%, 78.64% 44.90%, 79.33% 44.61%, 79.92% 43.91%, 80.45% 42.84%, 80.97% 41.51%, 81.51% 40.08%, 82.08% 38.70%, 82.64% 37.45%, 83.16% 36.29%, 83.58% 35.16%, 83.87% 33.95%, 83.99% 32.59%, 83.96% 31.08%, 83.78% 29.48%, 83.49% 27.90%, 83.09% 26.42%, 82.62% 25.12%, 82.08% 24.01%, 81.46% 23.05%, 80.78% 22.19%, 80.04% 21.40%, 79.25% 20.67%, 78.40% 20.02%, 77.52% 19.50%, 76.61% 19.14%, 75.67% 18.95%, 74.71% 18.91%, 73.74% 18.98%)">
+              <span class="crate-apple-glow" aria-hidden="true"><span class="crate-apple-cut"><img src="asset/apple-crate.webp" alt="" width="1243" height="748" loading="lazy"></span></span>
+              <span class="crate-apple-body" aria-hidden="true"><span class="crate-apple-cut"><img src="asset/apple-crate.webp" alt="" width="1243" height="748" loading="lazy"></span></span>
+            </button>
           </div>
-        </div>
-      </div>
-      <p class="banner-text section-title reveal">따고, 고르고, 담아내다.</p>
-      <div class="icon-row icon-row--reverse" aria-hidden="true">
-        <div class="icon-track">
-          <div class="icon-group">
-            <svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg>
-            <svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg>
-            <svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg><svg><use href="#i-apple"/></svg>
+          <div class="variety-cards">
+            <div class="variety-card variety-card--left" id="variety-hongro" role="group" aria-label="홍로" aria-hidden="true" style="--cx:27.6%; --cy:31.2%; --edge:17.7%">
+              <div class="variety-paper">
+                <p class="variety-head" style="--i:0"><strong class="variety-name">홍로</strong><span class="variety-month">9월</span></p>
+                <p class="variety-taste" style="--i:1">새콤함이 적고 단맛이 먼저 와요. 가을을 가장 먼저 여는 사과예요.</p>
+                <p class="variety-use" style="--i:2"><span>어울리는 곳</span>생과 디저트, 추석 선물</p>
+              </div>
+            </div>
+            <div class="variety-card variety-card--right" id="variety-shinano" role="group" aria-label="시나노골드" aria-hidden="true" style="--cx:50.7%; --cy:32.3%; --edge:84.1%">
+              <div class="variety-paper">
+                <p class="variety-head" style="--i:0"><strong class="variety-name">시나노골드</strong><span class="variety-month">10월</span></p>
+                <p class="variety-taste" style="--i:1">노란 껍질에 새콤달콤한 맛, 향이 진해요.</p>
+                <p class="variety-use" style="--i:2"><span>어울리는 곳</span>타르트, 음료, 색다른 선물</p>
+              </div>
+            </div>
+            <div class="variety-card variety-card--right" id="variety-fuji" role="group" aria-label="부사" aria-hidden="true" style="--cx:73.8%; --cy:32.6%; --edge:84.1%">
+              <div class="variety-paper">
+                <p class="variety-head" style="--i:0"><strong class="variety-name">부사</strong><span class="variety-month">11월</span></p>
+                <p class="variety-taste" style="--i:1">아삭하고 과즙이 많아요. 오래 두어도 맛이 잘 유지돼요.</p>
+                <p class="variety-use" style="--i:2"><span>어울리는 곳</span>베이킹, 주스, 연말 선물</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 7. 약속 -->
+    <!-- 6. 약속 -->
     <section class="section promise">
       <div class="container">
         <header class="section-head">
-          <h2 class="section-title reveal">좋은 한 알만 보내는 네 가지 약속</h2>
+          <h2 class="section-title reveal">좋은 한 알을 보내는 네 가지 약속</h2>
         </header>
-        <ul class="stamps">
-          <li class="stamp reveal" style="--d:0; --r:-6deg">
-            <strong class="stamp-big">100%</strong>
-            <span class="stamp-small">손으로 따요</span>
+        <!-- 꼬리표 가장자리·끈·도장 자국 잉크 필터 (자국은 꼬리표마다 seed가 달라 질감이 똑같지 않다) -->
+        <svg class="tag-defs" width="0" height="0" aria-hidden="true" focusable="false">
+          <defs>
+          <!-- 꼬리표 가장자리: 살짝 낡아 미세하게 울퉁불퉁 -->
+          <filter id="tag-rough" x="-3%" y="-3%" width="106%" height="106%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="5" result="warp"/>
+            <feDisplacementMap in="SourceGraphic" in2="warp" scale="2.4" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+          <linearGradient id="string-fade" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0" stop-color="#E6D7BF"/>
+            <stop offset="0.65" stop-color="#E6D7BF"/>
+            <stop offset="1" stop-color="#E6D7BF" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="ink-1" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="3" result="warp"/>
+            <feDisplacementMap in="SourceGraphic" in2="warp" scale="1.6" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="5" result="blotch"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="1" seed="11" result="grain"/>
+            <feComposite in="blotch" in2="grain" operator="arithmetic" k2="0.6" k3="0.5" result="noise"/>
+            <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.6 0 0 0 1.95" result="mask"/>
+            <feComposite in="rough" in2="mask" operator="in"/>
+          </filter>
+          <filter id="ink-2" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="8" result="warp"/>
+            <feDisplacementMap in="SourceGraphic" in2="warp" scale="1.6" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="17" result="blotch"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="1" seed="23" result="grain"/>
+            <feComposite in="blotch" in2="grain" operator="arithmetic" k2="0.6" k3="0.5" result="noise"/>
+            <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.6 0 0 0 1.95" result="mask"/>
+            <feComposite in="rough" in2="mask" operator="in"/>
+          </filter>
+          <filter id="ink-3" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="14" result="warp"/>
+            <feDisplacementMap in="SourceGraphic" in2="warp" scale="1.6" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="29" result="blotch"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="1" seed="37" result="grain"/>
+            <feComposite in="blotch" in2="grain" operator="arithmetic" k2="0.6" k3="0.5" result="noise"/>
+            <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.6 0 0 0 1.95" result="mask"/>
+            <feComposite in="rough" in2="mask" operator="in"/>
+          </filter>
+          <filter id="ink-4" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="21" result="warp"/>
+            <feDisplacementMap in="SourceGraphic" in2="warp" scale="1.6" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="41" result="blotch"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="1" seed="53" result="grain"/>
+            <feComposite in="blotch" in2="grain" operator="arithmetic" k2="0.6" k3="0.5" result="noise"/>
+            <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.6 0 0 0 1.95" result="mask"/>
+            <feComposite in="rough" in2="mask" operator="in"/>
+          </filter>
+          </defs>
+        </svg>
+        <!-- 책상 위 꼬리표 4장 + 그 위를 옮겨 다니며 찍는 나무 도장 (script.js가 땅땅땅땅 재생) -->
+        <div class="tags-stage">
+          <ul class="tags">
+          <li class="tag" style="--r:-5deg; --y:-10px">
+            <svg class="tag-string" viewBox="0 0 60 90" aria-hidden="true"><path d="M30 86 C 30 62, 18 46, 26 26 S 40 6, 34 -4" /></svg>
+            <div class="tag-body">
+              <div class="tag-paper">
+                <span class="tag-hole" aria-hidden="true"></span>
+                <div class="tag-mark" style="filter:url(#ink-1)">
+                  <svg class="tag-ring" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" stroke-width="4" vector-effect="non-scaling-stroke"/><circle cx="100" cy="100" r="78" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/><g transform="translate(100 13)"><path d="M0 -5.2c-1.2-1.6-3.6-2-5.2-.6C-7.4-4-7.6-.6-6.4 2.4-5.2 5.4-2.8 7.2-1.2 6.6-.6 6.4-.4 6.2 0 6.2s.6.2 1.2.4C2.8 7.2 5.2 5.4 6.4 2.4 7.6-.6 7.4-4 5.2-5.8 3.6-7.2 1.2-6.8 0-5.2Z"/><path d="M0-5.6C.2-7.4 1-8.8 2.6-9.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M1.4-7.6c1.6-1.8 4-2 5.4-1.4-1 1.6-3.2 2.4-5.4 1.4Z"/></g><g transform="translate(100 187) rotate(180)"><path d="M0 -5.2c-1.2-1.6-3.6-2-5.2-.6C-7.4-4-7.6-.6-6.4 2.4-5.2 5.4-2.8 7.2-1.2 6.6-.6 6.4-.4 6.2 0 6.2s.6.2 1.2.4C2.8 7.2 5.2 5.4 6.4 2.4 7.6-.6 7.4-4 5.2-5.8 3.6-7.2 1.2-6.8 0-5.2Z"/><path d="M0-5.6C.2-7.4 1-8.8 2.6-9.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M1.4-7.6c1.6-1.8 4-2 5.4-1.4-1 1.6-3.2 2.4-5.4 1.4Z"/></g><g transform="translate(13 100)"><path d="M0-6.5 1.9-2 6.6-1.8 2.9 1.2 4.1 5.8 0 3.2-4.1 5.8-2.9 1.2-6.6-1.8-1.9-2Z"/></g><g transform="translate(187 100)"><path d="M0-6.5 1.9-2 6.6-1.8 2.9 1.2 4.1 5.8 0 3.2-4.1 5.8-2.9 1.2-6.6-1.8-1.9-2Z"/></g></svg>
+                  <strong class="tag-big">100%</strong>
+                </div>
+                <p class="tag-text">손으로 따요</p>
+              </div>
+            </div>
           </li>
-          <li class="stamp reveal" style="--d:1; --r:5deg">
-            <strong class="stamp-big">14 Brix</strong>
-            <span class="stamp-small">당도 기준을 넘는<br>사과만 보내요</span>
+          <li class="tag" style="--r:4deg; --y:8px">
+            <svg class="tag-string" viewBox="0 0 60 90" aria-hidden="true"><path d="M30 86 C 30 62, 18 46, 26 26 S 40 6, 34 -4" /></svg>
+            <div class="tag-body">
+              <div class="tag-paper">
+                <span class="tag-hole" aria-hidden="true"></span>
+                <div class="tag-mark" style="filter:url(#ink-2)">
+                  <svg class="tag-ring" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" stroke-width="4" vector-effect="non-scaling-stroke"/><circle cx="100" cy="100" r="78" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/><g transform="translate(100 13)"><path d="M0 -5.2c-1.2-1.6-3.6-2-5.2-.6C-7.4-4-7.6-.6-6.4 2.4-5.2 5.4-2.8 7.2-1.2 6.6-.6 6.4-.4 6.2 0 6.2s.6.2 1.2.4C2.8 7.2 5.2 5.4 6.4 2.4 7.6-.6 7.4-4 5.2-5.8 3.6-7.2 1.2-6.8 0-5.2Z"/><path d="M0-5.6C.2-7.4 1-8.8 2.6-9.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M1.4-7.6c1.6-1.8 4-2 5.4-1.4-1 1.6-3.2 2.4-5.4 1.4Z"/></g><g transform="translate(100 187) rotate(180)"><path d="M0 -5.2c-1.2-1.6-3.6-2-5.2-.6C-7.4-4-7.6-.6-6.4 2.4-5.2 5.4-2.8 7.2-1.2 6.6-.6 6.4-.4 6.2 0 6.2s.6.2 1.2.4C2.8 7.2 5.2 5.4 6.4 2.4 7.6-.6 7.4-4 5.2-5.8 3.6-7.2 1.2-6.8 0-5.2Z"/><path d="M0-5.6C.2-7.4 1-8.8 2.6-9.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M1.4-7.6c1.6-1.8 4-2 5.4-1.4-1 1.6-3.2 2.4-5.4 1.4Z"/></g><g transform="translate(13 100)"><path d="M0-6.5 1.9-2 6.6-1.8 2.9 1.2 4.1 5.8 0 3.2-4.1 5.8-2.9 1.2-6.6-1.8-1.9-2Z"/></g><g transform="translate(187 100)"><path d="M0-6.5 1.9-2 6.6-1.8 2.9 1.2 4.1 5.8 0 3.2-4.1 5.8-2.9 1.2-6.6-1.8-1.9-2Z"/></g></svg>
+                  <strong class="tag-big">14 Brix</strong>
+                </div>
+                <p class="tag-text">당도 기준을 넘는 사과만 보내요</p>
+              </div>
+            </div>
           </li>
-          <li class="stamp reveal" style="--d:2; --r:-3deg">
-            <strong class="stamp-big">48h</strong>
-            <span class="stamp-small">수확 후 이틀 안에<br>출고해요</span>
+          <li class="tag" style="--r:-2deg; --y:-4px">
+            <svg class="tag-string" viewBox="0 0 60 90" aria-hidden="true"><path d="M30 86 C 30 62, 18 46, 26 26 S 40 6, 34 -4" /></svg>
+            <div class="tag-body">
+              <div class="tag-paper">
+                <span class="tag-hole" aria-hidden="true"></span>
+                <div class="tag-mark" style="filter:url(#ink-3)">
+                  <svg class="tag-ring" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" stroke-width="4" vector-effect="non-scaling-stroke"/><circle cx="100" cy="100" r="78" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/><g transform="translate(100 13)"><path d="M0 -5.2c-1.2-1.6-3.6-2-5.2-.6C-7.4-4-7.6-.6-6.4 2.4-5.2 5.4-2.8 7.2-1.2 6.6-.6 6.4-.4 6.2 0 6.2s.6.2 1.2.4C2.8 7.2 5.2 5.4 6.4 2.4 7.6-.6 7.4-4 5.2-5.8 3.6-7.2 1.2-6.8 0-5.2Z"/><path d="M0-5.6C.2-7.4 1-8.8 2.6-9.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M1.4-7.6c1.6-1.8 4-2 5.4-1.4-1 1.6-3.2 2.4-5.4 1.4Z"/></g><g transform="translate(100 187) rotate(180)"><path d="M0 -5.2c-1.2-1.6-3.6-2-5.2-.6C-7.4-4-7.6-.6-6.4 2.4-5.2 5.4-2.8 7.2-1.2 6.6-.6 6.4-.4 6.2 0 6.2s.6.2 1.2.4C2.8 7.2 5.2 5.4 6.4 2.4 7.6-.6 7.4-4 5.2-5.8 3.6-7.2 1.2-6.8 0-5.2Z"/><path d="M0-5.6C.2-7.4 1-8.8 2.6-9.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M1.4-7.6c1.6-1.8 4-2 5.4-1.4-1 1.6-3.2 2.4-5.4 1.4Z"/></g><g transform="translate(13 100)"><path d="M0-6.5 1.9-2 6.6-1.8 2.9 1.2 4.1 5.8 0 3.2-4.1 5.8-2.9 1.2-6.6-1.8-1.9-2Z"/></g><g transform="translate(187 100)"><path d="M0-6.5 1.9-2 6.6-1.8 2.9 1.2 4.1 5.8 0 3.2-4.1 5.8-2.9 1.2-6.6-1.8-1.9-2Z"/></g></svg>
+                  <strong class="tag-big">48h</strong>
+                </div>
+                <p class="tag-text">수확 후 이틀 안에 출고해요</p>
+              </div>
+            </div>
           </li>
-          <li class="stamp reveal" style="--d:3; --r:7deg">
-            <strong class="stamp-big stamp-big--since">SINCE<br>1968</strong>
-            <span class="stamp-small">3대째 같은 땅에서<br>키워요</span>
+          <li class="tag tag--since" style="--r:6deg; --y:12px">
+            <svg class="tag-string" viewBox="0 0 60 90" aria-hidden="true"><path d="M30 86 C 30 62, 18 46, 26 26 S 40 6, 34 -4" /></svg>
+            <div class="tag-body">
+              <div class="tag-paper">
+                <span class="tag-hole" aria-hidden="true"></span>
+                <div class="tag-mark" style="filter:url(#ink-4)">
+                  <svg class="tag-ring" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" stroke-width="4" vector-effect="non-scaling-stroke"/><circle cx="100" cy="100" r="78" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/><g transform="translate(100 13)"><path d="M0 -5.2c-1.2-1.6-3.6-2-5.2-.6C-7.4-4-7.6-.6-6.4 2.4-5.2 5.4-2.8 7.2-1.2 6.6-.6 6.4-.4 6.2 0 6.2s.6.2 1.2.4C2.8 7.2 5.2 5.4 6.4 2.4 7.6-.6 7.4-4 5.2-5.8 3.6-7.2 1.2-6.8 0-5.2Z"/><path d="M0-5.6C.2-7.4 1-8.8 2.6-9.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M1.4-7.6c1.6-1.8 4-2 5.4-1.4-1 1.6-3.2 2.4-5.4 1.4Z"/></g><g transform="translate(100 187) rotate(180)"><path d="M0 -5.2c-1.2-1.6-3.6-2-5.2-.6C-7.4-4-7.6-.6-6.4 2.4-5.2 5.4-2.8 7.2-1.2 6.6-.6 6.4-.4 6.2 0 6.2s.6.2 1.2.4C2.8 7.2 5.2 5.4 6.4 2.4 7.6-.6 7.4-4 5.2-5.8 3.6-7.2 1.2-6.8 0-5.2Z"/><path d="M0-5.6C.2-7.4 1-8.8 2.6-9.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M1.4-7.6c1.6-1.8 4-2 5.4-1.4-1 1.6-3.2 2.4-5.4 1.4Z"/></g><g transform="translate(13 100)"><path d="M0-6.5 1.9-2 6.6-1.8 2.9 1.2 4.1 5.8 0 3.2-4.1 5.8-2.9 1.2-6.6-1.8-1.9-2Z"/></g><g transform="translate(187 100)"><path d="M0-6.5 1.9-2 6.6-1.8 2.9 1.2 4.1 5.8 0 3.2-4.1 5.8-2.9 1.2-6.6-1.8-1.9-2Z"/></g></svg>
+                  <strong class="tag-big">SINCE<br>1968</strong>
+                </div>
+                <p class="tag-text">3대째 같은 땅에서 키워요</p>
+              </div>
+            </div>
           </li>
-        </ul>
+          </ul>
+          <span class="stamp-shadow" aria-hidden="true"></span>
+          <div class="stamp-tool" aria-hidden="true"><img src="asset/stamp.webp" alt="" width="513" height="963" loading="lazy"></div>
+        </div>
       </div>
     </section>
 
-    <!-- 8. 납품처 후기 -->
+    <!-- 7. 납품처 후기 -->
     <section class="section reviews" id="reviews">
       <div class="container">
         <header class="section-head">
@@ -326,77 +401,98 @@
       <div class="review-marquee reveal" style="--d:1">
         <div class="review-track">
           <ul class="review-group">
-            <li class="review-card">
-              <p class="review-quote">“박스마다 크기가 고르니 타르트 모양이 일정하게 나와요. 그게 제일 편해요.”</p>
-              <p class="review-from">서울 성수동 베이커리 사장님</p>
+            <li class="review-card" style="--r:-1.5deg; --y:-6px">
+              <svg class="card-stitch" aria-hidden="true"><rect width="100%" height="100%" rx="8"/></svg>
+              <span class="review-mark" aria-hidden="true">“</span>
+              <p class="review-quote">박스마다 크기가 고르니 타르트 모양이 일정하게 나와요. 그게 제일 편해요.</p>
+              <p class="review-from"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy">서울 성수동 베이커리 사장님</p>
             </li>
-            <li class="review-card">
-              <p class="review-quote">“시나노골드를 처음 써 봤는데, 손님들이 이 노란 사과 뭐냐고 많이 물어보세요.”</p>
-              <p class="review-from">대구 디저트 카페 사장님</p>
+            <li class="review-card" style="--r:1deg; --y:4px">
+              <svg class="card-stitch" aria-hidden="true"><rect width="100%" height="100%" rx="8"/></svg>
+              <span class="review-mark" aria-hidden="true">“</span>
+              <p class="review-quote">시나노골드를 처음 써 봤는데, 손님들이 이 노란 사과 뭐냐고 많이 물어보세요.</p>
+              <p class="review-from"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy">대구 디저트 카페 사장님</p>
             </li>
-            <li class="review-card">
-              <p class="review-quote">“추석 선물로 보냈더니 받은 분들이 과수원 이야기 카드까지 좋아하셨어요.”</p>
-              <p class="review-from">IT 기업 총무팀 담당자</p>
+            <li class="review-card" style="--r:-0.5deg; --y:-2px">
+              <svg class="card-stitch" aria-hidden="true"><rect width="100%" height="100%" rx="8"/></svg>
+              <span class="review-mark" aria-hidden="true">“</span>
+              <p class="review-quote">추석 선물로 보냈더니 받은 분들이 과수원 이야기 카드까지 좋아하셨어요.</p>
+              <p class="review-from"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy">IT 기업 총무팀 담당자</p>
             </li>
-            <li class="review-card">
-              <p class="review-quote">“11월 부사는 겨울 내내 주스로 써도 맛이 떨어지지 않아요.”</p>
-              <p class="review-from">부산 주스 바 사장님</p>
+            <li class="review-card" style="--r:1.5deg; --y:6px">
+              <svg class="card-stitch" aria-hidden="true"><rect width="100%" height="100%" rx="8"/></svg>
+              <span class="review-mark" aria-hidden="true">“</span>
+              <p class="review-quote">11월 부사는 겨울 내내 주스로 써도 맛이 떨어지지 않아요.</p>
+              <p class="review-from"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy">부산 주스 바 사장님</p>
             </li>
-            <li class="review-card">
-              <p class="review-quote">“주문하면 수확 일정부터 알려 주셔서 메뉴 계획 세우기가 쉬워요.”</p>
-              <p class="review-from">제주 브런치 카페 사장님</p>
+            <li class="review-card" style="--r:-1deg; --y:-4px">
+              <svg class="card-stitch" aria-hidden="true"><rect width="100%" height="100%" rx="8"/></svg>
+              <span class="review-mark" aria-hidden="true">“</span>
+              <p class="review-quote">주문하면 수확 일정부터 알려 주셔서 메뉴 계획 세우기가 쉬워요.</p>
+              <p class="review-from"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy">제주 브런치 카페 사장님</p>
             </li>
           </ul>
         </div>
       </div>
     </section>
 
-    <!-- 9. 납품·제휴 문의 -->
-    <section class="frame" id="contact">
-      <div class="frame-panel section">
-        <div class="container contact-grid">
-          <div class="contact-intro">
-            <h2 class="section-title reveal">올가을, 한 알을<br>함께 나눠요.</h2>
-            <p class="section-sub reveal" style="--d:1">남겨 주시면 수확 일정과 함께 이틀 안에 연락드릴게요.</p>
-          </div>
+    <!-- 8. 납품·제휴 문의: 섹션 전체 원단 빨강, 왼쪽 아래 바닥에 사과나무 -->
+    <section class="section contact" id="contact">
+      <div class="container contact-grid">
+        <div class="contact-intro">
+          <h2 class="section-title reveal">올가을, 한 알을<br>함께 나눠요.</h2>
+          <p class="section-sub reveal" style="--d:1">남겨 주시면 수확 일정과 함께 이틀 안에 연락드릴게요.</p>
+          <p class="contact-line reveal" style="--d:2">054-000-0000 · hello@applehouse.kr</p>
+        </div>
 
-          <div class="contact-body reveal" style="--d:1">
-            <form class="contact-form">
-              <div class="field">
-                <label for="f-company">업체명</label>
-                <input id="f-company" name="company" type="text" placeholder="카페, 베이커리, 회사 이름" autocomplete="organization" required>
-              </div>
-              <div class="field-row">
-                <div class="field">
-                  <label for="f-name">담당자명</label>
-                  <input id="f-name" name="name" type="text" placeholder="성함을 알려주세요" autocomplete="name" required>
-                </div>
-                <div class="field">
-                  <label for="f-phone">연락처</label>
-                  <input id="f-phone" name="phone" type="tel" placeholder="010-0000-0000" autocomplete="tel" inputmode="tel" required>
-                </div>
-              </div>
-              <div class="field">
-                <label for="f-type">문의 유형</label>
-                <select id="f-type" name="type" required>
-                  <option value="cafe">카페·베이커리 납품</option>
-                  <option value="gift">기업 선물</option>
-                  <option value="etc">기타</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="f-message">문의 내용 (선택)</label>
-                <textarea id="f-message" name="message" rows="4" placeholder="필요한 품종이나 시기를 편하게 적어주세요"></textarea>
-              </div>
-              <button class="btn" type="submit">납품 문의하기</button>
-            </form>
-
-            <div class="contact-done" role="status" tabindex="-1" hidden>
-              <svg class="contact-done-icon" aria-hidden="true"><use href="#i-apple"/></svg>
-              <p>접수됐어요! 이틀 안에 연락드릴게요.<br>그동안 사과는 나무에서 조금 더 익어 갈게요.</p>
+        <div class="contact-body reveal" style="--d:1">
+          <form class="contact-form">
+            <div class="field">
+              <label for="f-company">업체명</label>
+              <input id="f-company" name="company" type="text" placeholder="카페, 베이커리, 회사 이름" autocomplete="organization" required>
             </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="f-name">담당자명</label>
+                <input id="f-name" name="name" type="text" placeholder="성함을 알려주세요" autocomplete="name" required>
+              </div>
+              <div class="field">
+                <label for="f-phone">연락처</label>
+                <input id="f-phone" name="phone" type="tel" placeholder="010-0000-0000" autocomplete="tel" inputmode="tel" required>
+              </div>
+            </div>
+            <div class="field">
+              <label for="f-type">문의 유형</label>
+              <select id="f-type" name="type" required>
+                <option value="cafe">카페·베이커리 납품</option>
+                <option value="gift">기업 선물</option>
+                <option value="etc">기타</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-message">문의 내용 (선택)</label>
+              <textarea id="f-message" name="message" rows="4" placeholder="필요한 품종이나 시기를 편하게 적어주세요"></textarea>
+            </div>
+            <button class="btn btn--invert" type="submit">
+              <svg class="btn-stitch" aria-hidden="true"><rect width="100%" height="100%" rx="25"/></svg>
+              납품 문의하기
+            </button>
+          </form>
+
+          <div class="contact-done" role="status" tabindex="-1" hidden>
+            <svg class="card-stitch" aria-hidden="true"><rect width="100%" height="100%" rx="8"/></svg>
+            <img class="contact-done-patch" src="asset/apple-patch.webp" alt="" width="680" height="800">
+            <p>접수됐어요! 이틀 안에 연락드릴게요.<br>그동안 사과는 나무에서 조금 더 익어 갈게요.</p>
           </div>
         </div>
+      </div>
+      <!-- 섹션에 들어오면 바닥에서 자라고 사과가 톡톡 열린다 (script.js가 .is-grown 부여, 약 1.4초) -->
+      <div class="contact-tree" aria-hidden="true">
+        <div class="contact-tree-grow"><img src="asset/apple-tree.webp" alt="" width="970" height="1266" loading="lazy"></div>
+        <span class="contact-apple contact-apple--1"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"></span>
+        <span class="contact-apple contact-apple--2"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"></span>
+        <span class="contact-apple contact-apple--3"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"></span>
+        <span class="contact-apple contact-apple--4"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"></span>
       </div>
     </section>
 

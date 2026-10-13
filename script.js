@@ -135,9 +135,420 @@
   syncMotion();
   reduceMotion.addEventListener('change', syncMotion);
 
-  /* ---------- Marquee (배너 아이콘 · 후기) ---------- */
+  /* ---------- 히어로 사과 더미 (나무에 사과가 다 열린 뒤 후두둑 쏟아져 쌓임, GSAP) ---------- */
+  // 자리는 미리 계산한 가로 줄로 떨어진다(물리 엔진 없음). 떨어지는 사과·쌓인 사과 모두 나무 뒤 레이어(.hero-pile)라
+  // 잎·열린 와펜 앞을 지나가지 않고, 줄기·잔디 언덕이 더미 앞에 보인다
+  const pile = document.querySelector('.hero-pile');
+  if (pile) {
+    const heroPanel = pile.closest('.hero-left');
+    const APPLE_RATIO = 800 / 680; // 와펜 세로 / 가로
+    const PILE_HEIGHT = 0.2; // 더미 윗면 = 면 높이의 20%
+    const ROWS = 3;
+
+    // 매번 같은 더미 모양이 나오도록 고정 시드 난수
+    const seeded = (seed) => () => {
+      seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+
+    // 더미 자리 (px, 왼쪽 면 기준): 가로 줄 3개를 빈틈없이 채우고, 사과마다 x ±8px · y ±4px · 크기 ±6% · 각도 ±18°만 흔든다.
+    // 크기·각도 차이를 작게 둬서 윗면이 면 전체 너비에서 고르다. 맨 아랫줄은 면 아래 가장자리 밖으로 살짝 잘린다
+    const buildPile = () => {
+      const W = heroPanel.clientWidth;
+      const H = heroPanel.clientHeight;
+      const mobile = window.matchMedia('(max-width: 760px)').matches;
+      const rand = seeded(1968);
+      const w = H * (mobile ? 0.13 : 0.105);
+      const h = w * APPLE_RATIO;
+      const base = -w * 0.25;
+      // 맨 윗줄 위끝이 면 높이의 20%에 오도록 줄 간격을 정한다
+      const step = (H * PILE_HEIGHT - base - h) / (ROWS - 1);
+      const gap = w * 0.72;
+      const list = [];
+      for (let row = 0; row < ROWS; row += 1) {
+        const offset = (row % 2) * gap * 0.5;
+        for (let x = -w * 0.3 + offset; x < W + w * 0.3; x += gap) {
+          const size = w * (0.94 + rand() * 0.12);
+          list.push({
+            cx: x + (rand() * 2 - 1) * 8,
+            bottom: base + row * step + (rand() * 2 - 1) * 4,
+            w: size,
+            rot: (rand() * 2 - 1) * 18,
+            row,
+            z: 50 - row * 10 + Math.floor(rand() * 4), // 앞(아래) 줄이 위에 보이게
+          });
+        }
+      }
+      return list;
+    };
+
+    let pileApples = [];
+    const renderPile = () => {
+      pile.replaceChildren();
+      pileApples = buildPile().map((d) => {
+        const el = document.createElement('span');
+        el.className = 'pile-apple';
+        el.style.cssText = `left:${d.cx - d.w / 2}px;bottom:${d.bottom}px;width:${d.w}px;z-index:${d.z};--rot:${d.rot.toFixed(1)}deg`;
+        el.innerHTML = '<img src="asset/apple-patch.webp" alt="" width="680" height="800">';
+        pile.appendChild(el);
+        return { el, ...d };
+      });
+    };
+
+    const { gsap } = window;
+    // 나무에 와펜이 거의 다 열려 갈 무렵(마지막 와펜 1.95초) 바로 시작
+    const START_AT = 1800;
+    const loadedAt = performance.now();
+    let playing = false;
+
+    const settle = () => {
+      renderPile();
+      pile.classList.add('is-settled');
+    };
+
+    if (!gsap || reduceMotion.matches) {
+      settle();
+    } else {
+      renderPile();
+      const rand = Math.random;
+      const between = (a, b) => a + rand() * (b - a);
+      const W = heroPanel.clientWidth;
+      const H = heroPanel.clientHeight;
+      // 대기: 면 위쪽 바깥(사과 크기 + 40px 위)에 숨기고 자기 낙하가 시작될 때까지 visibility: hidden.
+      // 출발 가로 위치는 잎 바로 위보다 양옆(0~25%, 75~100%)에 더 많이
+      pileApples.forEach((a) => {
+        const h = a.w * APPLE_RATIO;
+        const startX = rand() < 0.7
+          ? (rand() < 0.5 ? between(0, 0.25) : between(0.75, 1)) * W
+          : between(0, 1) * W;
+        // 착지 후 구르기는 자기 자리 안에서만 (최대 8px)
+        a.roll = rand() < 0.35 ? (rand() < 0.5 ? -1 : 1) * between(4, 8) : 0;
+        a.rollRot = (a.roll / (a.w / 2)) * (180 / Math.PI);
+        gsap.set(a.el, {
+          visibility: 'hidden',
+          x: startX - a.cx,
+          // 사과 아래끝을 면 맨 위로 올린 뒤(−(H − bottom)) 사과 크기(대각선) + 40px만큼 더 위
+          y: -(H - a.bottom) - Math.hypot(a.w, h) - 40 - between(0, 120),
+          rotation: (rand() < 0.5 ? -1 : 1) * between(120, 420),
+        });
+      });
+
+      // 세 번의 물결: 몇 개 → 잠깐 멈춤 → 와르르 → 마지막 후두둑. 아래 줄부터 착지하도록 줄 순서로 시작 시각을 나눈다
+      const order = [...pileApples].sort((a, b) => a.row - b.row || rand() - 0.5);
+      const n = order.length;
+      const w1 = Math.max(3, Math.round(n * 0.15));
+      const w3 = Math.max(3, Math.round(n * 0.12));
+      const times = (count, from, to) => Array.from({ length: count }, () => between(from, to)).sort((a, b) => a - b);
+      // 천천히: 물결 간격과 낙하 시간을 2배로 (전체 약 5초)
+      const starts = [...times(w1, 0, 0.7), ...times(n - w1 - w3, 1.24, 2.8), ...times(w3, 3, 3.6)];
+
+      const play = () => {
+        playing = true;
+        heroPanel.classList.add('is-falling');
+        const tl = gsap.timeline({
+          onComplete: () => {
+            playing = false;
+            heroPanel.classList.remove('is-falling');
+            pile.classList.add('is-settled');
+          },
+        });
+        order.forEach((a, i) => {
+          const t = starts[i];
+          const dur = between(0.96, 1.4);
+          const h = a.w * APPLE_RATIO;
+          const wob = between(6, 14);
+          tl.set(a.el, { visibility: 'visible' }, t)
+            .to(a.el, { y: 0, duration: dur, ease: 'power2.in' }, t)
+            .to(a.el, { x: a.roll, duration: dur, ease: 'sine.inOut' }, t)
+            .to(a.el, { rotation: a.rollRot, duration: dur, ease: 'power1.out' }, t)
+            // 떨어지는 동안 좌우로 살짝 흔들리며
+            .to(a.el, { keyframes: { xPercent: [0, wob, -wob * 0.8, wob * 0.4, 0] }, duration: dur, ease: 'none' }, t)
+            // 착지: 짧게 납작 → 복원 + 작게 통통
+            .to(a.el, { scaleY: 0.85, scaleX: 1.1, duration: 0.06, ease: 'power1.out' }, t + dur)
+            .to(a.el, { scaleY: 1, scaleX: 1, duration: 0.12, ease: 'power1.out' }, t + dur + 0.06)
+            .to(a.el, { y: -h * between(0.06, 0.13), duration: 0.13, ease: 'power2.out' }, t + dur + 0.06)
+            .to(a.el, { y: 0, duration: 0.13, ease: 'power2.in' }, t + dur + 0.19);
+          if (rand() < 0.5) {
+            tl.to(a.el, { y: -h * 0.04, duration: 0.08, ease: 'power2.out' }, t + dur + 0.32)
+              .to(a.el, { y: 0, duration: 0.08, ease: 'power2.in' }, t + dur + 0.4);
+          }
+          if (a.roll) tl.to(a.el, { x: 0, rotation: 0, duration: 0.3, ease: 'power2.out' }, t + dur + 0.08);
+        });
+        // 마지막 사과가 쌓이면 더미 전체가 한 번 살짝 들썩
+        tl.to(pileApples.map((a) => a.el), { y: -3, duration: 0.09, ease: 'sine.out', yoyo: true, repeat: 1 }, '+=0.02');
+      };
+
+      // 히어로가 화면에 보일 때만, 세션 중 1회. 늦게 보이면 남은 대기 시간만큼만 기다렸다가 재생
+      const observer = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        window.setTimeout(play, Math.max(0, START_AT - (performance.now() - loadedAt)));
+      });
+      observer.observe(heroPanel);
+    }
+
+    // 화면 크기가 바뀌면(재생 중이 아닐 때) 쌓인 상태로 다시 배치
+    let resizeTimer = 0;
+    let lastW = heroPanel.clientWidth;
+    let lastH = heroPanel.clientHeight;
+    window.addEventListener('resize', () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        if (heroPanel.clientWidth === lastW && heroPanel.clientHeight === lastH) return;
+        lastW = heroPanel.clientWidth;
+        lastH = heroPanel.clientHeight;
+        if (!playing && pile.classList.contains('is-settled')) settle();
+      }, 200);
+    });
+  }
+
+  /* ---------- 5. 품종: 사과 한 박스 ---------- */
+  // 마우스·키보드 포커스·탭으로 그 사과가 떠오르고 카드가 펼쳐진다.
+  // 아무도 건드리지 않으면 섹션이 보이는 동안 홍로 → 시나노골드 → 부사를 3.5초마다 차례로 소개, 손을 떼면 4초 뒤 다시 시작
+  const crate = document.querySelector('.crate');
+  if (crate) {
+    const crateApples = [...crate.querySelectorAll('.crate-apple')];
+    const AUTO_MS = 3500;
+    const RESUME_MS = 4000;
+    let openIndex = -1;
+    let autoIndex = -1;
+    let autoTimer = null;
+    let resumeTimer = null;
+    let inView = false;
+    let held = false;
+
+    const cards = crateApples.map((btn) => document.getElementById(btn.getAttribute('aria-controls')));
+    // 카드는 한 번에 하나만: 이전 카드가 완전히 접힌 뒤(CARD_CLOSE_MS) 다음 카드를 연다.
+    // 빠르게 오가도 마지막 요청 하나만 남기므로 빈 틀이나 카드 두 장이 동시에 보이지 않는다
+    const CARD_CLOSE_MS = 340; // style.css .variety-paper 접힘 0.3초 + 여유
+    let shownCard = -1;
+    let closedAt = 0;
+    let cardTimer = 0;
+    const setCard = (i, on) => {
+      cards[i].classList.toggle('is-open', on);
+      cards[i].setAttribute('aria-hidden', String(!on));
+    };
+    const showCard = (index) => {
+      window.clearTimeout(cardTimer);
+      if (index === shownCard) return;
+      if (shownCard >= 0) {
+        setCard(shownCard, false);
+        shownCard = -1;
+        closedAt = performance.now();
+      }
+      if (index < 0) return;
+      const wait = Math.max(0, CARD_CLOSE_MS - (performance.now() - closedAt));
+      const open = () => {
+        setCard(index, true);
+        shownCard = index;
+      };
+      if (wait) cardTimer = window.setTimeout(open, wait);
+      else open();
+    };
+
+    const openApple = (index) => {
+      openIndex = index;
+      crate.classList.toggle('has-open', index >= 0);
+      crateApples.forEach((btn, i) => {
+        const on = i === index;
+        btn.classList.toggle('is-open', on);
+        btn.setAttribute('aria-expanded', String(on));
+      });
+      showCard(index);
+      if (index >= 0) autoIndex = index;
+    };
+
+    const stopAuto = () => {
+      window.clearInterval(autoTimer);
+      window.clearTimeout(resumeTimer);
+      autoTimer = null;
+    };
+    const step = () => openApple((autoIndex + 1) % crateApples.length);
+    // showNow: 바로 다음 사과를 보여 주고 시작 / 아니면 지금 펼친 사과를 3.5초 더 두고 넘어감
+    const startAuto = (showNow) => {
+      stopAuto();
+      if (!inView || held) return;
+      if (showNow) step();
+      autoTimer = window.setInterval(step, AUTO_MS);
+    };
+    const resumeLater = (showNow) => {
+      window.clearTimeout(resumeTimer);
+      resumeTimer = window.setTimeout(() => startAuto(showNow), RESUME_MS);
+    };
+
+    const hold = (index) => {
+      held = true;
+      stopAuto();
+      openApple(index);
+    };
+    const release = ({ close = true, showNow = true } = {}) => {
+      held = false;
+      if (close) openApple(-1);
+      resumeLater(showNow);
+    };
+
+    crateApples.forEach((btn, i) => {
+      const cut = btn.querySelector('.crate-apple-body .crate-apple-cut');
+      let pointerType = '';
+      cut.addEventListener('pointerenter', (event) => {
+        if (event.pointerType === 'mouse') hold(i);
+      });
+      cut.addEventListener('pointerleave', (event) => {
+        if (event.pointerType === 'mouse' && document.activeElement !== btn) release();
+      });
+      btn.addEventListener('pointerdown', (event) => { pointerType = event.pointerType; });
+      // 탭: 펼치고, 읽을 시간을 두고(4초 + 3.5초) 다음 사과로. 이미 펼친 사과를 다시 탭하면 접힘
+      btn.addEventListener('click', () => {
+        if (pointerType !== 'touch' && pointerType !== 'pen') return;
+        pointerType = '';
+        if (openIndex === i && !autoTimer) {
+          release();
+        } else {
+          hold(i);
+          release({ close: false, showNow: false });
+        }
+      });
+      // 키보드 포커스(Tab)로도 펼침. 포커스가 빠지면 접고 4초 뒤 다시 소개
+      btn.addEventListener('focus', () => {
+        if (btn.matches(':focus-visible')) hold(i);
+      });
+      btn.addEventListener('blur', () => {
+        if (held && openIndex === i) release();
+      });
+    });
+
+    new IntersectionObserver((entries) => {
+      inView = entries[0].isIntersecting;
+      if (inView) {
+        startAuto(openIndex < 0);
+      } else {
+        stopAuto();
+        held = false;
+        openApple(-1);
+      }
+    }, { threshold: 0.35 }).observe(crate);
+  }
+
+  /* ---------- 6. 약속: 나무 도장이 꼬리표 4장을 땅땅땅땅 (GSAP) ---------- */
+  // 도장이 오른쪽 위 화면 밖에서 들어와 꼬리표마다 [떠 있음 → 내려감 0.22초 → 땅 0.08초(자국이 나타남) → 들어 올림 0.2초 → 호를 그리며 다음으로 0.3초]
+  // = 한 장당 0.8초. 네 번째를 찍으면 오른쪽 아래로 옮겨 12° 기울여 놓는다. 섹션 진입 시 1회, 이후엔 찍힌 상태 + 놓인 도장 유지
+  const tagStage = document.querySelector('.tags-stage');
+  if (tagStage) {
+    const tags = [...tagStage.querySelectorAll('.tag')];
+    const marks = tags.map((tag) => tag.querySelector('.tag-mark'));
+    const bodies = tags.map((tag) => tag.querySelector('.tag-body'));
+    const tool = tagStage.querySelector('.stamp-tool');
+    const shadow = tagStage.querySelector('.stamp-shadow');
+    const ORIGIN_X = 0.499; // 고무 바닥 중심 (도장 이미지 기준)
+    const ORIGIN_Y = 0.812;
+    const { gsap } = window;
+    let done = false;
+
+    // 무대 기준 좌표: 자국 가운데(찍는 점)와 다 찍은 뒤 놓을 자리(4번째 꼬리표 오른쪽 아래)
+    const stageBox = () => tagStage.getBoundingClientRect();
+    const markPoint = (i) => {
+      const s = stageBox();
+      const r = marks[i].getBoundingClientRect();
+      return { x: r.left + r.width / 2 - s.left, y: r.top + r.height / 2 - s.top };
+    };
+    const restPoint = () => {
+      const s = stageBox();
+      const r = tags[tags.length - 1].getBoundingClientRect();
+      const w = tool.offsetWidth;
+      // 좁은 화면(2×2)은 오른쪽에 자리가 없어 꼬리표 아래 가운데 빈 공간에 (도장 몸통이 꼬리표 글자를 가리지 않게)
+      if (window.matchMedia('(max-width: 1024px)').matches) {
+        return { x: s.width / 2, y: r.bottom - s.top + tool.offsetHeight * ORIGIN_Y + 12 };
+      }
+      return { x: Math.min(r.right - s.left + w * 0.4, s.width - w * 0.55), y: r.bottom - s.top + w * 0.2 };
+    };
+    // 바닥 기준점이 p에 오도록 한 도장 위치
+    const toolAt = (p) => ({ x: p.x - tool.offsetWidth * ORIGIN_X, y: p.y - tool.offsetHeight * ORIGIN_Y });
+
+    const placeRest = () => {
+      const rest = restPoint();
+      const at = toolAt(rest);
+      const set = (el, v) => (gsap ? gsap.set(el, v) : Object.assign(el.style, { transform: `translate(${v.x}px, ${v.y}px) rotate(${v.rotation || 0}deg) scale(${v.scale || 1})` }));
+      set(tool, { x: at.x, y: at.y, rotation: 12, scale: 1 });
+      if (gsap) gsap.set(shadow, { x: rest.x + 2, y: rest.y + 3, scale: 0.9, opacity: 0.22, filter: 'blur(3px)' });
+      tool.classList.add('is-placed', 'is-resting');
+    };
+
+    if (!gsap || reduceMotion.matches) {
+      // 애니메이션 없이 자국이 찍힌 꼬리표 4장 + 놓인 도장
+      placeRest();
+      done = true;
+    } else {
+      gsap.set(marks, { opacity: 0 });
+
+      const stampTags = () => {
+        const pts = marks.map((_, i) => markPoint(i));
+        const ats = pts.map(toolAt);
+        const rest = restPoint();
+        const restAt = toolAt(rest);
+        const lift = (p) => ({ x: p.x + 16, y: p.y + 20, scale: 1.15, opacity: 0.15, filter: 'blur(18px)' });
+        const tl = gsap.timeline({
+          onComplete: () => {
+            done = true;
+            tool.classList.add('is-resting');
+          },
+        });
+        // 오른쪽 위 화면 밖에서 첫 꼬리표 위로 들어와 떠 있음
+        gsap.set(tool, { x: stageBox().width + 80, y: -tool.offsetHeight - 120, rotation: 10, scale: 1.15 });
+        gsap.set(shadow, { ...lift(pts[0]), x: pts[0].x + 90, y: pts[0].y + 60, opacity: 0 });
+        tool.classList.add('is-placed');
+        tl.to(tool, { x: ats[0].x, y: ats[0].y, rotation: 0, duration: 0.6, ease: 'power2.out' })
+          .to(shadow, { ...lift(pts[0]), duration: 0.6, ease: 'power2.out' }, '<');
+
+        const START = 0.75;
+        pts.forEach((p, i) => {
+          const t = START + i * 0.8;
+          // 내려가기: 1.15 → 1, 그림자는 작고 진하게
+          tl.to(tool, { scale: 1, duration: 0.22, ease: 'power2.in' }, t)
+            .to(shadow, { x: p.x, y: p.y + 2, scale: 0.85, opacity: 0.3, filter: 'blur(4px)', duration: 0.22, ease: 'power2.in' }, t)
+            // 땅: 살짝 눌림 + 자국이 빠르게 나타남 + 꼬리표도 아주 살짝 눌림
+            .to(tool, { scaleX: 1.02, scaleY: 0.95, duration: 0.04, ease: 'power1.out' }, t + 0.22)
+            .to(tool, { scaleX: 1, scaleY: 1, duration: 0.04, ease: 'power1.in' }, t + 0.26)
+            .to(marks[i], { opacity: 0.85, duration: 0.06, ease: 'power1.out' }, t + 0.22)
+            .to(bodies[i], { y: 1.5, duration: 0.04, ease: 'power1.out', yoyo: true, repeat: 1 }, t + 0.22)
+            // 들어 올리기
+            .to(tool, { scale: 1.15, duration: 0.2, ease: 'power2.out' }, t + 0.3)
+            .to(shadow, { ...lift(p), duration: 0.2, ease: 'power2.out' }, t + 0.3);
+          if (i < pts.length - 1) {
+            // 다음 꼬리표 위로 살짝 호를 그리며
+            const next = ats[i + 1];
+            const top = Math.min(ats[i].y, next.y) - 28;
+            tl.to(tool, { x: next.x, duration: 0.3, ease: 'power1.inOut' }, t + 0.5)
+              .to(tool, { y: top, duration: 0.15, ease: 'sine.out' }, t + 0.5)
+              .to(tool, { y: next.y, duration: 0.15, ease: 'sine.in' }, t + 0.65)
+              .to(shadow, { x: pts[i + 1].x + 16, y: pts[i + 1].y + 20, duration: 0.3, ease: 'power1.inOut' }, t + 0.5);
+          } else {
+            // 다 찍으면 오른쪽 아래 빈 공간에 12° 기울여 내려놓기
+            tl.to(tool, { x: restAt.x, y: restAt.y, rotation: 12, duration: 0.5, ease: 'power2.inOut' }, t + 0.5)
+              .to(tool, { scale: 1, duration: 0.2, ease: 'power2.in' }, t + 0.8)
+              .to(shadow, { x: rest.x + 2, y: rest.y + 3, scale: 0.9, opacity: 0.22, filter: 'blur(3px)', duration: 0.7, ease: 'power2.inOut' }, t + 0.5);
+          }
+        });
+      };
+
+      const tagObserver = new IntersectionObserver((entries) => {
+        if (!entries[0].isIntersecting) return;
+        tagObserver.disconnect();
+        stampTags();
+      }, { threshold: 0.45 });
+      tagObserver.observe(tagStage);
+    }
+
+    // 다 찍은 뒤 화면 크기가 바뀌면 놓인 도장 자리를 다시 맞춘다
+    window.addEventListener('resize', () => {
+      if (done) placeRest();
+    });
+  }
+
+  /* ---------- Marquee (후기) ---------- */
   // 같은 그룹을 한 번 더 붙여 -50% 이동으로 끊김 없이 이어지게 한다.
-  document.querySelectorAll('.icon-track, .review-track').forEach((track) => {
+  document.querySelectorAll('.review-track').forEach((track) => {
     const group = track.firstElementChild;
     const clone = group.cloneNode(true);
     clone.setAttribute('aria-hidden', 'true');
@@ -509,12 +920,47 @@
     revealEls.forEach((el) => io.observe(el));
   }
 
+  /* ---------- 8. 문의: 나무가 자라고 사과가 톡톡 (히어로 모션을 짧게, 1회) ---------- */
+  const contact = document.querySelector('.contact');
+  const contactTree = contact && contact.querySelector('.contact-tree');
+  if (contactTree) {
+    // 나무 높이가 글 블록(헤드라인·연락처)까지 올라오지 않게 섹션 기준 글 아래끝을 넘겨 준다
+    const intro = contact.querySelector('.contact-intro');
+    const setIntroBottom = () => {
+      const top = contact.getBoundingClientRect().top;
+      contact.style.setProperty('--intro-bottom', `${intro.getBoundingClientRect().bottom - top}px`);
+    };
+    setIntroBottom();
+    window.addEventListener('resize', setIntroBottom);
+    if (document.fonts) document.fonts.ready.then(setIntroBottom); // 히피체가 늦게 오면 헤드라인 높이가 바뀐다
+    if (reduceMotion.matches) {
+      contactTree.classList.add('is-grown');
+    } else {
+      const treeObserver = new IntersectionObserver((entries) => {
+        if (!entries[0].isIntersecting) return;
+        treeObserver.disconnect();
+        contactTree.classList.add('is-grown');
+      }, { threshold: 0.3 });
+      treeObserver.observe(contactTree);
+    }
+  }
+
   /* ---------- Contact form (실제 전송 없음) ---------- */
   const form = document.querySelector('.contact-form');
   const done = document.querySelector('.contact-done');
 
+  // 문의 내용: 기본 리사이즈 핸들 대신 내용에 맞춰 세로로만 늘어남 (최대 높이는 style.css)
+  const message = form.querySelector('textarea');
+  const fitMessage = () => {
+    message.style.height = 'auto';
+    message.style.height = `${message.scrollHeight}px`;
+  };
+  message.addEventListener('input', fitMessage);
+
   form.addEventListener('submit', (event) => {
     event.preventDefault();
+    // 폼 자리 높이를 그대로 둬서 섹션(과 바닥의 나무)이 갑자기 줄어들지 않게
+    done.style.minHeight = `${form.offsetHeight}px`;
     form.hidden = true;
     done.hidden = false;
     done.focus({ preventScroll: true });
