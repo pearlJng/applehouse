@@ -12,6 +12,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Jua&display=swap">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body>
@@ -25,46 +28,75 @@
     </symbol>
   </svg>
 
-  <!-- Header -->
+  <!-- Header: 크림 종이 바 + 박음질 점선, 와펜 로고 / 납품 문의 · 햄버거 -->
   <header class="site-header">
     <div class="header-inner">
-      <a class="logo" href="#top" aria-label="APPLE HOUSE 처음으로">APPLE HOUSE</a>
-      <nav class="header-nav" aria-label="주요 메뉴">
-        <a class="nav-link" href="#year">사과의 일 년</a>
-        <a class="nav-link" href="#story">이야기</a>
-        <a class="nav-link" href="#varieties">품종</a>
-        <a class="nav-link" href="#reviews">후기</a>
-      </nav>
-      <a class="btn btn--sm header-cta" href="#contact">납품 문의</a>
+      <a class="logo" href="#top" aria-label="APPLE HOUSE 맨 위로">
+        <img class="logo-patch" src="asset/apple-patch.webp" alt="" width="680" height="800">
+        <span>APPLE HOUSE</span>
+      </a>
+      <div class="header-actions">
+        <a class="btn header-cta" href="#contact">
+          <svg class="btn-stitch" aria-hidden="true"><rect width="100%" height="100%" rx="21"/></svg>
+          납품 문의
+        </a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="메뉴 열기">
+          <span class="menu-toggle-line"></span>
+          <span class="menu-toggle-line"></span>
+        </button>
+      </div>
     </div>
   </header>
+
+  <!-- 전체 메뉴: 원단 질감 빨강 패널이 위에서 아래로 내려오며 열린다 -->
+  <div class="menu-panel" id="site-menu" aria-hidden="true">
+    <nav class="menu-nav" aria-label="전체 메뉴">
+      <ol class="menu-list">
+          <li style="--i:0"><a class="menu-link" href="#year"><img class="menu-patch" src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"><span>사과의 일 년</span></a></li>
+          <li style="--i:1"><a class="menu-link" href="#story"><img class="menu-patch" src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"><span>이야기</span></a></li>
+          <li style="--i:2"><a class="menu-link" href="#varieties"><img class="menu-patch" src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"><span>품종</span></a></li>
+          <li style="--i:3"><a class="menu-link" href="#reviews"><img class="menu-patch" src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"><span>후기</span></a></li>
+          <li style="--i:4"><a class="menu-link" href="#contact"><img class="menu-patch" src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"><span>납품 문의</span></a></li>
+      </ol>
+    </nav>
+    <p class="menu-contact">054-000-0000 · hello@applehouse.kr</p>
+    <div class="menu-tree" aria-hidden="true">
+      <img class="menu-tree-img" src="asset/apple-tree.webp" alt="" width="970" height="1266" loading="lazy">
+        <span class="menu-apple menu-apple--1"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"></span>
+        <span class="menu-apple menu-apple--2"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"></span>
+        <span class="menu-apple menu-apple--3"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"></span>
+        <span class="menu-apple menu-apple--4"><img src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"></span>
+    </div>
+  </div>
 
   <main id="top">
 
     <!-- 1. 히어로 -->
     <section class="hero" aria-label="애플하우스 소개">
       <div class="hero-left">
-        <p class="hero-en hero-en--top" aria-hidden="true">ONE APPLE</p>
-        <!-- 와펜: float(떠오름) > enter(등장) > patch(hover) 세 겹으로 transform을 나눠 겹치지 않게 한다 -->
-        <div class="patch-float" aria-hidden="true">
-          <div class="patch-enter">
-            <figure class="patch">
-              <img src="asset/apple-patch.webp" alt="" width="680" height="800">
-            </figure>
+        <div class="hero-tree" aria-hidden="true">
+          <div class="tree-grow">
+            <img class="tree-img" src="asset/apple-tree.webp" alt="" width="970" height="1266">
+            <img class="tree-leaves" src="asset/apple-tree-leaves.webp" alt="" width="970" height="1266">
           </div>
+          <span class="tree-apple tree-apple--1"><img src="asset/apple-patch.webp" alt="" width="680" height="800"></span>
+          <span class="tree-apple tree-apple--2"><img src="asset/apple-patch.webp" alt="" width="680" height="800"></span>
+          <span class="tree-apple tree-apple--3"><img src="asset/apple-patch.webp" alt="" width="680" height="800"></span>
+          <span class="tree-apple tree-apple--4"><img src="asset/apple-patch.webp" alt="" width="680" height="800"></span>
+          <span class="tree-apple tree-apple--5"><img src="asset/apple-patch.webp" alt="" width="680" height="800"></span>
+          <span class="tree-apple tree-apple--6"><img src="asset/apple-patch.webp" alt="" width="680" height="800"></span>
         </div>
-        <p class="hero-en hero-en--bottom" aria-hidden="true">ONE YEAR</p>
       </div>
 
       <div class="hero-right">
         <div class="hero-slides" aria-hidden="true">
-          <div class="hero-slide is-active"><figure class="hero-media ph ph--spring" data-file="season-spring.webp"><img src="asset/season-spring.webp" alt="" onerror="this.hidden=true"></figure></div>
-          <div class="hero-slide"><figure class="hero-media ph ph--summer" data-file="season-summer.webp"><img src="asset/season-summer.webp" alt="" onerror="this.hidden=true"></figure></div>
-          <div class="hero-slide"><figure class="hero-media ph ph--autumn" data-file="season-autumn.webp"><img src="asset/season-autumn.webp" alt="" onerror="this.hidden=true"></figure></div>
-          <div class="hero-slide"><figure class="hero-media ph ph--winter" data-file="season-winter.webp"><img src="asset/season-winter.webp" alt="" onerror="this.hidden=true"></figure></div>
+          <div class="hero-slide is-active"><figure class="hero-media"><img src="asset/season-spring.webp" alt=""></figure></div>
+          <div class="hero-slide"><figure class="hero-media"><img src="asset/season-summer.webp" alt=""></figure></div>
+          <div class="hero-slide"><figure class="hero-media"><img src="asset/season-autumn.webp" alt=""></figure></div>
+          <div class="hero-slide"><figure class="hero-media"><img src="asset/season-winter.webp" alt=""></figure></div>
         </div>
         <div class="hero-copy">
-          <h1 class="hero-title">사과 한 알에,<br>일 년이 들어 있어요.</h1>
+          <h1 class="hero-title">사과 한 알에,<br><em>일 년이</em> 들어 있어요.</h1>
           <p class="hero-sub">경북 청송, 3대째 사과를 키우는 애플하우스입니다.</p>
         </div>
       </div>
@@ -72,64 +104,106 @@
 
     <!-- 2. 한 문장 -->
     <section class="section statement">
+      <img class="statement-branch" src="asset/branch.webp" alt="" width="877" height="585" loading="lazy" aria-hidden="true">
       <div class="container">
-        <h2 class="section-title reveal">좋은 사과는,<br><em>서두르지 않은</em> 일 년에서 나와요.</h2>
-        <p class="section-sub reveal" style="--d:1">빨리 키우면 크기는 커져도 맛이 비어요. 그래서 저희는 계절마다 할 일을 미루지 않고, 기다려야 할 때는 기다립니다.</p>
+        <div class="statement-text">
+          <h2 class="section-title roll-title reveal">좋은 사과는,<br><em>서두르지 않은</em> <span class="nowrap">일 년에서 나와요.</span></h2>
+          <p class="section-sub reveal" style="--d:1">빨리 키우면 크기는 커져도 맛이 비어요. 그래서 저희는 계절마다 할 일을 미루지 않고, 기다려야 할 때는 기다립니다.</p>
+        </div>
       </div>
+      <img class="statement-farm reveal" src="asset/farmhouse.webp" alt="" width="1063" height="676" loading="lazy" aria-hidden="true">
     </section>
 
-    <!-- 3. 사과의 일 년 -->
-    <section class="frame" id="year">
-      <div class="frame-panel section">
-        <div class="container">
-          <header class="section-head">
-            <h2 class="section-title reveal">한 알이 되기까지, 사계절</h2>
-            <p class="section-sub reveal" style="--d:1">사과는 가을에 따지만, 맛은 봄부터 만들어져요.</p>
-          </header>
-
-          <ol class="seasons">
-            <li class="season-card reveal" style="--d:0">
-              <figure class="season-photo ph ph--spring" data-file="season-spring.webp"><img src="asset/season-spring.webp" alt="흰 사과꽃이 핀 가지" loading="lazy" onerror="this.hidden=true"></figure>
-              <div class="season-body">
-                <p class="season-when">SPRING · 04—05</p>
-                <h3 class="card-title">꽃을 솎아요</h3>
-                <p class="season-do">한 꽃눈에서 피는 다섯 송이 중 가운데 한 송이만 남겨요.</p>
-                <p class="season-result">한 알에 양분이 모여요.</p>
+    <!-- 3. 사과의 일 년 (동화책: 앞표지 → 봄·여름·가을·겨울 → 뒤표지, StPageFlip) -->
+    <section class="year" id="year" aria-label="사과 한 알이 맺기까지">
+      <div class="year-stage">
+        <div class="book">
+          <!-- 표지·펼침면 뒤에 깔린 종이 묶음 (두께감, script.js가 위치·두께 조절) -->
+          <div class="book-stack book-stack--left" aria-hidden="true"></div>
+          <div class="book-stack book-stack--right" aria-hidden="true"></div>
+          <!-- 페이지 10장: 앞표지(하드) / 봄·여름·가을·겨울 그림·글 / 뒤표지(하드).
+               라이브러리가 .page 자체 스타일을 덮어쓰므로 모양은 안쪽 .page-content에 준다 -->
+          <div class="book-flip">
+            <div class="page page--cover-front" data-density="hard">
+              <div class="page-content book-cover book-cover--front">
+                <svg class="cover-stitch" aria-hidden="true"><rect width="100%" height="100%" rx="6"/></svg>
+                <div class="cover-group">
+                  <img class="cover-patch" src="asset/apple-patch.webp" alt="" width="680" height="800">
+                  <h2 class="section-title cover-title"><span class="nowrap">사과 한 알이</span> 맺기까지</h2>
+                  <p class="cover-sub">사과는 가을에 따지만, 맛은 봄부터 만들어져요.</p>
+                </div>
+                <p class="cover-logo">APPLE HOUSE</p>
+                <svg class="page-hint" viewBox="0 0 40 24" aria-hidden="true"><path d="M2 12h32M24 3l10 9-10 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </div>
-            </li>
-            <li class="season-card reveal" style="--d:1">
-              <figure class="season-photo ph ph--summer" data-file="season-summer.webp"><img src="asset/season-summer.webp" alt="초록 풋사과가 달린 가지" loading="lazy" onerror="this.hidden=true"></figure>
-              <div class="season-body">
-                <p class="season-when">SUMMER · 06—08</p>
-                <h3 class="card-title">열매를 솎아요</h3>
-                <p class="season-do">열매가 맺히면 다시 골라, 한 가지에 한 알씩만 키워요.</p>
-                <p class="season-result">크기와 맛이 고르게 자라요.</p>
+            </div>
+            <div class="page page--left">
+              <div class="page-content page-content--left page-content--picture">
+                <!-- 계절 일러스트(book-*). 파일이 없으면 히어로 계절 그림으로 대신하고 앞쪽 나무 위주로 확대 -->
+                <figure class="page-picture"><img src="asset/book-spring.webp" alt="봄 사과나무 아래에서 꽃을 솎는 농부" width="1086" height="1448" loading="lazy" onerror="this.onerror=null;this.src='asset/season-spring.webp';this.parentElement.classList.add('is-fallback')"></figure>
               </div>
-            </li>
-            <li class="season-card reveal" style="--d:2">
-              <figure class="season-photo ph ph--autumn" data-file="season-autumn.webp"><img src="asset/season-autumn.webp" alt="빨갛게 익은 사과를 수확하는 과수원" loading="lazy" onerror="this.hidden=true"></figure>
-              <div class="season-body">
-                <p class="season-when">AUTUMN · 09—11</p>
-                <h3 class="card-title">손으로 따요</h3>
-                <p class="season-do">나무 아래 반사 필름을 깔아 고루 붉게 물들이고, 한 알씩 손으로 따요.</p>
-                <p class="season-result">상처 없이, 가장 맛있을 때 거둬요.</p>
+            </div>
+            <div class="page page--right">
+              <div class="page-content page-content--right">
+                <p class="page-when">SPRING · 04—05</p>
+                <h3 class="page-title">꽃을 솎아요</h3>
+                <p class="page-do">사월 말, 과수원이 하얗게 피어나면 가장 바빠져요. 한 꽃눈에서 피는 다섯 송이 중 가운데 가장 큰 꽃 하나만 남기고, 나머지는 손으로 하나하나 따 줘요.</p>
+                <p class="page-quote">“꽃을 딸 때가 제일 아까워요. 그래도 이 손이 가을의 맛을 정해요.”</p>
+                <p class="page-result">한 알에 양분이 모여요.</p>
               </div>
-            </li>
-            <li class="season-card reveal" style="--d:3">
-              <figure class="season-photo ph ph--winter" data-file="season-winter.webp"><img src="asset/season-winter.webp" alt="잎이 진 겨울 사과나무" loading="lazy" onerror="this.hidden=true"></figure>
-              <div class="season-body">
-                <p class="season-when">WINTER · 12—02</p>
-                <h3 class="card-title">가지를 쳐요</h3>
-                <p class="season-do">잎이 진 나무의 가지를 다듬어, 내년에 햇빛이 고루 들게 해요.</p>
-                <p class="season-result">다음 해의 한 알이 준비돼요.</p>
+            </div>
+            <div class="page page--left">
+              <div class="page-content page-content--left page-content--picture">
+                <!-- 계절 일러스트(book-*). 파일이 없으면 히어로 계절 그림으로 대신하고 앞쪽 나무 위주로 확대 -->
+                <figure class="page-picture"><img src="asset/book-summer.webp" alt="여름 사과나무에서 풋사과를 고르는 농부" width="1086" height="1448" loading="lazy" onerror="this.onerror=null;this.src='asset/season-summer.webp';this.parentElement.classList.add('is-fallback')"></figure>
               </div>
-            </li>
-          </ol>
-
-          <p class="year-outro reveal">
-            <svg class="year-outro-icon" aria-hidden="true"><use href="#i-apple"/></svg>
-            그렇게 일 년이 지나야, 한 알이 됩니다.
-          </p>
+            </div>
+            <div class="page page--right">
+              <div class="page-content page-content--right">
+                <p class="page-when">SUMMER · 06—08</p>
+                <h3 class="page-title">열매를 솎아요</h3>
+                <p class="page-do">콩알만 한 열매가 맺히면 다시 한 번 골라요. 모양이 고르고 햇볕을 잘 받을 자리의 열매만 남겨, 한 가지에 한 알씩 키워요. 장마가 지나면 풀을 베어 나무가 숨 쉴 틈을 만들어 줘요.</p>
+                <p class="page-quote">“여름엔 하루에도 몇 번씩 나무 사이를 걸어요. 나무마다 표정이 달라요.”</p>
+                <p class="page-result">크기와 맛이 고르게 자라요.</p>
+              </div>
+            </div>
+            <div class="page page--left">
+              <div class="page-content page-content--left page-content--picture">
+                <!-- 계절 일러스트(book-*). 파일이 없으면 히어로 계절 그림으로 대신하고 앞쪽 나무 위주로 확대 -->
+                <figure class="page-picture"><img src="asset/book-autumn.webp" alt="가을 과수원에서 빨간 사과를 손으로 따는 농부" width="1086" height="1448" loading="lazy" onerror="this.onerror=null;this.src='asset/season-autumn.webp';this.parentElement.classList.add('is-fallback')"></figure>
+              </div>
+            </div>
+            <div class="page page--right">
+              <div class="page-content page-content--right">
+                <p class="page-when">AUTUMN · 09—11</p>
+                <h3 class="page-title">손으로 따요</h3>
+                <p class="page-do">수확을 앞두고 나무 아래 은빛 반사 필름을 깔아요. 아래에서 올라온 햇빛이 사과 밑동까지 고루 붉게 물들여요. 다 익은 사과는 한 알씩 손으로 따서 바로 그늘에서 식혀요.</p>
+                <p class="page-quote">“사과는 작은 상처에도 금방 상해요. 그래서 끝까지 손으로 따요.”</p>
+                <p class="page-result">상처 없이, 가장 맛있을 때 거둬요.</p>
+              </div>
+            </div>
+            <div class="page page--left">
+              <div class="page-content page-content--left page-content--picture">
+                <!-- 계절 일러스트(book-*). 파일이 없으면 히어로 계절 그림으로 대신하고 앞쪽 나무 위주로 확대 -->
+                <figure class="page-picture"><img src="asset/book-winter.webp" alt="눈 덮인 겨울 과수원에서 가지를 치는 농부" width="1086" height="1448" loading="lazy" onerror="this.onerror=null;this.src='asset/season-winter.webp';this.parentElement.classList.add('is-fallback')"></figure>
+              </div>
+            </div>
+            <div class="page page--right">
+              <div class="page-content page-content--right">
+                <p class="page-when">WINTER · 12—02</p>
+                <h3 class="page-title">가지를 쳐요</h3>
+                <p class="page-do">잎이 다 지고 나무가 쉬는 겨울, 저희는 내년을 준비해요. 안쪽으로 엉킨 가지와 너무 높이 자란 가지를 잘라 햇빛과 바람이 고루 드나들게 해요.</p>
+                <p class="page-quote">“겨울에 자른 가지 하나가 내년 사과의 얼굴을 바꿔요.”</p>
+                <p class="page-result">다음 해의 한 알이 준비돼요.</p>
+              </div>
+            </div>
+            <div class="page page--cover-back" data-density="hard">
+              <div class="page-content book-cover book-cover--back" aria-hidden="true">
+                <svg class="cover-stitch" aria-hidden="true"><rect width="100%" height="100%" rx="6"/></svg>
+                <img class="cover-patch cover-patch--small" src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy">
+                <p class="cover-logo">APPLE HOUSE</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -146,11 +220,9 @@
           </div>
           <p class="story-sign reveal" style="--d:2">애플하우스 3대 농부 김한결</p>
         </div>
-        <div class="story-photos">
-          <figure class="story-photo ph ph--story reveal" style="--d:0" data-file="story-01.webp"><img src="asset/story-01.webp" alt="나무 상자에 담긴 사과" loading="lazy" onerror="this.hidden=true"></figure>
-          <figure class="story-photo ph ph--story reveal" style="--d:1" data-file="story-02.webp"><img src="asset/story-02.webp" alt="사과를 고르는 농부의 손" loading="lazy" onerror="this.hidden=true"></figure>
-          <figure class="story-photo ph ph--story reveal" style="--d:2" data-file="story-03.webp"><img src="asset/story-03.webp" alt="사과나무 사이로 난 과수원 길" loading="lazy" onerror="this.hidden=true"></figure>
-        </div>
+        <figure class="story-figure reveal" style="--d:1">
+          <img src="asset/story-family.webp" alt="사과나무 아래 나무 벤치에 모인 3대 가족 — 할아버지·할머니와 부모, 사과를 든 아이" width="1122" height="1402" loading="lazy">
+        </figure>
       </div>
     </section>
 

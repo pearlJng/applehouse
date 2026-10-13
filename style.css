@@ -21,10 +21,6 @@
   --leaf: #3F6B3A;
 
   /* placeholder tints */
-  --ph-spring: #F8E3DE;
-  --ph-summer: #E8EED2;
-  --ph-autumn: #F7DCBF;
-  --ph-winter: #DCE2E4;
 
   /* type */
   --font-display: 'Mungyeong Gamhong Apple', 'Jua', 'Pretendard Variable', sans-serif;
@@ -33,7 +29,6 @@
 
   --fs-display: clamp(40px, 3.6vw, 56px);
   --fs-title: clamp(32px, 3.4vw, 48px);
-  --fs-en: clamp(28px, 3.6vw, 56px);
   --fs-subtitle: 22px;
   --fs-lead: 18px;
   --fs-body: 17px;
@@ -44,7 +39,7 @@
   --gutter: 64px;
   --container: 1240px;
   --frame: 32px;
-  --header-h: 75px;
+  --header-h: 72px;
 
   --radius-card: 20px;
   --radius-panel: 32px;
@@ -145,11 +140,6 @@ em { font-style: normal; }
 }
 .ph img[hidden] { display: none; }
 
-.ph--spring { background: var(--ph-spring); }
-.ph--summer { background: var(--ph-summer); }
-.ph--autumn { background: var(--ph-autumn); }
-.ph--winter { background: var(--ph-winter); }
-.ph--story  { background: var(--cream-deep); }
 .ph--apple  { background: var(--cream); border-radius: 50%; }
 .ph--apple img { object-fit: contain; }
 /* 실제 이미지가 불러와지면(script.js가 is-loaded 부여) 색 면과 파일명을 지운다 */
@@ -176,9 +166,7 @@ em { font-style: normal; }
   transform: translateY(-2px);
   box-shadow: 3px 3px 0 var(--ink);
 }
-.btn:focus-visible,
-.nav-link:focus-visible,
-.logo:focus-visible {
+.btn:focus-visible {
   outline: 3px solid var(--apple-soft);
   outline-offset: 3px;
 }
@@ -188,48 +176,263 @@ em { font-style: normal; }
   font-size: var(--fs-small);
 }
 
-/* ---------- Header (히어로 위 별도 크림 바) ---------- */
+/* ---------- Header: 크림 종이 바 + 박음질 점선 ---------- */
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 50;
-  padding: 14px 40px;
+  z-index: 60;
+  height: 72px;
+  padding: 0 40px;
   background: var(--cream);
-  border-bottom: 1px solid var(--ink-faint);
+  transition: transform 0.45s var(--ease-out), background-color 0.3s ease;
 }
+/* 하단 박음질 점선 (1.5px, 6 6) */
+.site-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1.5px;
+  background: repeating-linear-gradient(90deg, var(--ink-faint) 0 6px, transparent 6px 12px);
+  transition: opacity 0.3s ease;
+}
+/* 내려가면 위로 숨고, 올라오면 다시 내려온다 (script.js) */
+.site-header.is-hidden { transform: translateY(-100%); }
 
 .header-inner {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 24px;
-}
-.header-nav {
   display: flex;
-  gap: 40px;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
 }
-.header-cta { justify-self: end; }
 
+/* 로고: 살짝 기울여 붙인 와펜 + APPLE HOUSE */
 .logo {
-  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font: 800 22px/1 var(--font-en);
   letter-spacing: 0.04em;
   color: var(--apple);
   white-space: nowrap;
+  transition: color 0.3s ease;
+}
+.logo-patch {
+  width: auto;
+  height: 30px;
+  rotate: -6deg;
+  transform-origin: 50% 85%;
+}
+.logo:hover .logo-patch { animation: logo-wobble 0.4s ease-in-out; }
+@keyframes logo-wobble {
+  0%, 100% { rotate: -6deg; }
+  50% { rotate: 4deg; }
+}
+.logo:focus-visible,
+.menu-toggle:focus-visible,
+.menu-link:focus-visible {
+  outline: 3px solid var(--apple-soft);
+  outline-offset: 3px;
 }
 
-.nav-link {
-  padding: 8px 0;
-  font-size: var(--fs-small);
-  font-weight: 600;
-  line-height: 1.4;
-  text-decoration: underline 1.5px transparent;
-  text-underline-offset: 6px;
-  transition: color 200ms var(--ease-out), text-decoration-color 200ms var(--ease-out);
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
-.nav-link:hover {
-  color: var(--apple);
-  text-decoration-color: currentColor;
+/* 납품 문의: 알약 버튼 + 안쪽 3px 크림 박음질 */
+.header-cta {
+  position: relative;
+  min-height: 48px;
+  height: 48px;
+  padding: 0 26px;
+  font-size: var(--fs-small);
+  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out), opacity 0.3s ease, visibility 0.3s;
+}
+.btn-stitch {
+  position: absolute;
+  inset: 3px;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  overflow: visible;
+  pointer-events: none;
+}
+.btn-stitch rect {
+  fill: none;
+  stroke: rgba(255, 248, 238, 0.7);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+/* 햄버거: 48px 크림 원 + 길이가 다른 두 줄(오른쪽 정렬) → 열리면 X */
+.menu-toggle {
+  position: relative;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+.menu-toggle-line {
+  position: absolute;
+  right: 12.5px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: width 0.3s var(--ease-out), top 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+}
+.menu-toggle-line:first-child { top: 17.5px; width: 20px; }
+.menu-toggle-line:last-child { top: 24.5px; width: 14px; }
+.menu-toggle:hover .menu-toggle-line:last-child { width: 20px; }
+.menu-toggle[aria-expanded="true"] .menu-toggle-line { top: 21px; width: 20px; }
+.menu-toggle[aria-expanded="true"] .menu-toggle-line:first-child { transform: rotate(45deg); }
+.menu-toggle[aria-expanded="true"] .menu-toggle-line:last-child { transform: rotate(-45deg); }
+
+/* 메뉴가 열리면: 바는 투명, 로고 글자·햄버거(X)는 크림으로 빨간 패널 위에 얹힌다. 납품 문의는 숨김 */
+.site-header.is-menu-open { background-color: transparent; }
+.site-header.is-menu-open::after { opacity: 0; }
+.site-header.is-menu-open .logo { color: var(--cream); }
+.site-header.is-menu-open .menu-toggle { background-color: transparent; border-color: var(--cream); color: var(--cream); }
+.site-header.is-menu-open .header-cta { visibility: hidden; opacity: 0; }
+
+/* ---------- 전체 메뉴 패널 ---------- */
+.menu-panel {
+  --menu-x: 104px;
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--apple);
+  color: var(--cream);
+  /* 위 → 아래로 드러내기 */
+  clip-path: inset(0 0 100% 0);
+  visibility: hidden;
+  transition: clip-path 0.6s cubic-bezier(0.76, 0, 0.24, 1), visibility 0s linear 0.6s;
+}
+.menu-panel.is-open {
+  clip-path: inset(0 0 0 0);
+  visibility: visible;
+  transition: clip-path 0.6s cubic-bezier(0.76, 0, 0.24, 1), visibility 0s;
+}
+/* 히어로 왼쪽과 같은 원단 질감 빨강 */
+.menu-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url("asset/fabric-texture.webp") center / cover no-repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+  pointer-events: none;
+}
+.menu-nav {
+  position: absolute;
+  top: calc(var(--header-h) + 6vh);
+  left: var(--menu-x);
+  z-index: 2;
+}
+.menu-list li {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+/* 위에서부터 0.06초 간격으로 아래에서 올라오며 등장 */
+.menu-panel.is-open .menu-list li {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s ease calc(0.3s + var(--i) * 60ms), transform 0.6s var(--ease-out) calc(0.3s + var(--i) * 60ms);
+}
+.menu-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  line-height: 1.3;
+  color: var(--cream);
+}
+.menu-link span {
+  display: inline-block;
+  transition: transform 0.3s var(--ease-out);
+}
+/* hover 시 앞에 작은 와펜 사과가 톡 튀어나오고 글자가 12px 오른쪽으로 */
+.menu-patch {
+  position: absolute;
+  top: 50%;
+  left: -0.92em;
+  width: 0.7em;
+  height: auto;
+  translate: 0 -50%;
+  rotate: -8deg;
+  scale: 0;
+  transition: scale 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.menu-link:hover .menu-patch,
+.menu-link:focus-visible .menu-patch { scale: 1; }
+.menu-link:hover span,
+.menu-link:focus-visible span { transform: translateX(12px); }
+
+.menu-contact {
+  position: absolute;
+  left: var(--menu-x);
+  bottom: 40px;
+  z-index: 2;
+  font-size: var(--fs-body);
+  color: rgba(255, 248, 238, 0.8);
+}
+/* 오른쪽 아래: 히어로와 같은 나무, 바닥에 딱 붙여 크게 + 와펜 사과 4개 */
+.menu-tree {
+  position: absolute;
+  right: 7vw;
+  bottom: 0;
+  z-index: 1;
+  height: min(76vh, 100vh - var(--header-h) - 48px);
+  aspect-ratio: 970 / 1266;
+}
+.menu-tree-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.menu-apple { position: absolute; }
+.menu-apple img { display: block; width: 100%; height: auto; rotate: var(--tilt); }
+.menu-apple--1 { left: 30.5%; top: 7.24%; width: 15%; --tilt: 5deg; }
+.menu-apple--2 { left: 58.5%; top: 14.14%; width: 13%; --tilt: -4deg; }
+.menu-apple--3 { left: 11%; top: 34.69%; width: 14%; --tilt: -8deg; }
+.menu-apple--4 { left: 75%; top: 38.69%; width: 14%; --tilt: 9deg; }
+
+/* 메뉴가 열려 있는 동안 페이지 스크롤 잠금 (스크롤 위치는 그대로).
+   스크롤바가 사라진 만큼 오른쪽 여백을 채워 헤더 버튼이 옆으로 밀리지 않게 (--scrollbar-w는 script.js) */
+html.is-menu-locked {
+  overflow: hidden;
+  padding-right: var(--scrollbar-w, 0px);
+}
+
+/* ---------- Fabric (큰 빨간 면: 히어로 왼쪽 · 3번 사계절 · 9번 문의 프레임) ---------- */
+.hero-left::before,
+.year::before,
+#contact.frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("asset/fabric-texture.webp") center / cover no-repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+  pointer-events: none;
+}
+/* 세로로 긴 3번은 cover면 결이 2~3배 굵어지므로 히어로 왼쪽과 같은 결 크기(약 720px)로 반복 */
+.year::before {
+  background-size: 720px auto;
+  background-repeat: repeat;
+  background-position: 0 0;
 }
 
 /* ---------- 1. Hero ---------- */
@@ -243,58 +446,110 @@ em { font-style: normal; }
 
 .hero-left {
   position: relative;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  justify-items: center;
-  align-items: center;
-  padding: 48px;
+  isolation: isolate;
   background: var(--apple);
-  color: var(--cream);
   overflow: hidden;
-}
-.hero-en {
-  font: 800 var(--fs-en)/1 var(--font-en);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  container-type: size;
 }
 
-/* 와펜: 바깥은 천천히 떠오르기, 가운데는 로드 시 한 번 튕기며 붙기, 안쪽은 hover.
-   너비는 왼쪽 면(패딩 포함)의 40%, 낮은 화면에서는 높이 기준으로 줄인다. */
-.patch-float {
-  width: min(calc((100% + 96px) * 0.4), 34svh);
-  aspect-ratio: 680 / 800;
-  animation: patch-float 4.6s ease-in-out infinite;
+/* 나무 + 사과 와펜: 같은 박스 안에 두고 % 좌표로 붙인다.
+   높이는 면의 80%, 단 헤더와 48px 이상 띄우고 가로 여백 20px 안쪽으로 제한 */
+.hero-tree {
+  --tree-h: min(80cqh, 100cqh - 48px, (100cqw - 40px) * 1266 / 970);
+  position: absolute;
+  bottom: calc(var(--tree-h) * -0.04); /* 언덕 아래 둥근 끝(나무 높이의 4%)을 면 밖으로 내려 땅처럼 보이게 */
+  left: calc(50% - var(--tree-h) * 485 / 1266);
+  width: calc(var(--tree-h) * 970 / 1266);
+  height: var(--tree-h);
+  transform-origin: 50% 100%;
+  animation: tree-sway 6s ease-in-out 2.4s infinite;
 }
-.patch-enter {
+/* 언덕 바닥 아래에 깔아 면 밖으로 이어지는 받침 — 흔들릴 때 언덕 끝이 들리거나
+   가장자리가 부드럽게 처리돼도 빨간 면이 비치지 않게 (나무 이미지 뒤에 깔림) */
+.hero-tree::before {
+  content: "";
+  position: absolute;
+  top: calc(100% - 6px);
+  left: 29.5%;
+  right: 31%;
+  height: 22px;
+  background: #7F946B;
+  animation: tree-base-in 0s 300ms backwards;
+}
+.tree-grow {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+  animation: tree-grow 1s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.tree-img,
+.tree-leaves {
+  position: absolute;
+  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
-  animation: patch-enter 0.9s var(--ease-bounce) 0.25s both;
 }
-.patch {
-  width: 100%;
-  height: 100%;
-  transition: transform 300ms var(--ease-out);
+/* 잎만 따로 뺀 레이어를 겹쳐 부풀린다. 끝나면 다시 투명 */
+.tree-leaves {
+  opacity: 0;
+  transform-origin: 50% 60%;
+  animation: leaf-puff 400ms ease-in-out 900ms both;
 }
-.patch img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.patch-float:hover .patch { transform: scale(1.06) rotate(4deg); }
 
-@keyframes patch-float {
-  0%, 100% { transform: translateY(6px) rotate(-3deg); }
-  50%      { transform: translateY(-12px) rotate(3deg); }
+.tree-apple {
+  position: absolute;
+  transform-origin: 50% 15%;
+  animation: apple-wiggle var(--wiggle-dur) ease-in-out var(--wiggle-delay) infinite;
 }
-@keyframes patch-enter {
-  from { opacity: 0; transform: scale(0.72) rotate(-8deg); }
-  to   { opacity: 1; transform: none; }
+.tree-apple img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform: rotate(var(--tilt));
+  animation: apple-pop 450ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--pop-delay) both;
+}
+.tree-apple--1 { left: 30.5%; top: 7.24%; width: 15%; --tilt: 5deg;  --pop-delay: 1.2s;  --wiggle-dur: 3.2s; --wiggle-delay: 2.4s; }
+.tree-apple--2 { left: 58.5%; top: 14.14%; width: 13%; --tilt: -4deg; --pop-delay: 1.35s; --wiggle-dur: 3.8s; --wiggle-delay: 3.1s; }
+.tree-apple--3 { left: 11%; top: 34.69%; width: 14%; --tilt: -8deg; --pop-delay: 1.5s;  --wiggle-dur: 3.5s; --wiggle-delay: 2.7s; }
+.tree-apple--4 { left: 40%; top: 28.79%; width: 16%; --tilt: -3deg; --pop-delay: 1.65s; --wiggle-dur: 4.1s; --wiggle-delay: 3.4s; }
+.tree-apple--5 { left: 75%; top: 38.69%; width: 14%; --tilt: 9deg;  --pop-delay: 1.8s;  --wiggle-dur: 3.4s; --wiggle-delay: 2.9s; }
+.tree-apple--6 { left: 10.5%; top: 55.14%; width: 13%; --tilt: 6deg;  --pop-delay: 1.95s; --wiggle-dur: 3.9s; --wiggle-delay: 3.6s; }
+
+@keyframes tree-base-in {
+  from { opacity: 0; }
+}
+@keyframes tree-grow {
+  0% { transform: scaleY(0.2); clip-path: inset(100% 0 0 0); }
+  70% { transform: scaleY(1.04); clip-path: inset(-10% -10% 0 -10%); }
+  100% { transform: none; clip-path: inset(-10% -10% 0 -10%); }
+}
+@keyframes leaf-puff {
+  0%, 100% { opacity: 0; transform: scale(1); }
+  15%, 85% { opacity: 1; }
+  50% { transform: scale(1.03); }
+}
+@keyframes apple-pop {
+  0% { transform: scale(0) rotate(calc(var(--tilt) - 12deg)); }
+  65% { transform: scale(1.15) rotate(calc(var(--tilt) + 4deg)); }
+  100% { transform: scale(1) rotate(var(--tilt)); }
+}
+@keyframes tree-sway {
+  0%, 100% { rotate: 0deg; }
+  25% { rotate: 1deg; }
+  75% { rotate: -1deg; }
+}
+@keyframes apple-wiggle {
+  0%, 100% { rotate: 0deg; }
+  25% { rotate: 3deg; }
+  75% { rotate: -3deg; }
 }
 
 .hero-right {
   position: relative;
   overflow: hidden;
-  background: var(--ink);
+  background: var(--cream);
+  container-type: size;
 }
 .hero-slides { position: absolute; inset: 0; }
 .hero-slide {
@@ -306,11 +561,23 @@ em { font-style: normal; }
 .hero-slide.is-prev   { opacity: 1; z-index: 1; }
 .hero-slide.is-active { opacity: 1; z-index: 2; }
 
+/* 오른쪽 농가(가로 76~96%, 지붕 끝 세로 27.7%)가 잘리지 않게 오른쪽 기준으로 맞추고,
+   확대 축은 오른쪽 위에 두어 확대해도 위·오른쪽 가장자리와 지붕 위 여백이 줄지 않게 한다 */
 .hero-media {
   position: absolute;
   inset: 0;
-  transform: translateX(-1.5%) scale(1.05);
+  transform-origin: 100% 0;
+  transform: translateX(0.5%) scale(1.03);
   will-change: transform;
+}
+.hero-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 세로: 가능한 한 아래(잔디·눈밭)까지 내리되, 지붕 끝(이미지 높이 27.5%) 위로 24px은 남긴다.
+     가로로 꽉 찰 때 이미지 높이 = 면 너비 × 1.5 → 지붕 끝 = 41.25cqw */
+  object-position: 100% max(100%, 24px - 41.25cqw);
 }
 /* is-active → is-prev로 바뀌어도 animation-name이 같아서 이어서 흐른다 */
 .hero-slide.is-active .hero-media,
@@ -318,54 +585,146 @@ em { font-style: normal; }
   animation: hero-drift 7.2s linear forwards;
 }
 @keyframes hero-drift {
-  from { transform: translateX(-1.5%) scale(1.05); }
-  to   { transform: translateX(1.5%) scale(1.1); }
+  from { transform: translateX(0.5%) scale(1.03); }
+  to   { transform: translateX(2%) scale(1.06); }
 }
 
-.hero-right::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  background: linear-gradient(180deg, rgba(43, 29, 26, 0) 40%, rgba(43, 29, 26, 0.6) 100%);
-  pointer-events: none;
-}
 .hero-copy {
   position: absolute;
   left: 56px;
   right: 56px;
   bottom: 64px;
   z-index: 4;
-  color: var(--cream);
+  color: var(--ink);
 }
 .hero-title {
   font-family: var(--font-display);
   font-size: var(--fs-display);
   font-weight: 400;
-  line-height: 1.2;
+  line-height: 1.25;
   letter-spacing: 0;
   white-space: nowrap;
+  /* 밝은 일러스트 위 가독성: 글자 바깥으로만 보이는 크림 외곽선 + 옅은 크림 번짐 한 겹.
+     stroke 0.1em 중 안쪽 절반은 fill이 덮어 바깥 약 0.05em만 보인다 */
+  -webkit-text-stroke: 0.1em var(--cream);
+  paint-order: stroke fill;
+  stroke-linejoin: round;
+  text-shadow: 0 0 0.25em rgba(255, 248, 238, 0.5);
+}
+/* paint-order 미지원: 외곽선 대신 8방향 크림 그림자로 같은 두께(0.05em)를 만든다 */
+@supports not (paint-order: stroke fill) {
+  .hero-title {
+    -webkit-text-stroke: 0;
+    text-shadow:
+      0.05em 0 0 var(--cream), -0.05em 0 0 var(--cream),
+      0 0.05em 0 var(--cream), 0 -0.05em 0 var(--cream),
+      0.035em 0.035em 0 var(--cream), -0.035em 0.035em 0 var(--cream),
+      0.035em -0.035em 0 var(--cream), -0.035em -0.035em 0 var(--cream),
+      0 0 0.25em rgba(255, 248, 238, 0.5);
+  }
+}
+.hero-title em {
+  font-style: normal;
+  color: var(--apple);
 }
 .hero-sub {
   margin-top: 20px;
   font-size: 20px;
+  font-weight: 500;
   line-height: 1.6;
-  opacity: 0.92;
+  text-shadow: 0 0 6px rgba(255, 248, 238, 0.7), 0 0 14px rgba(255, 248, 238, 0.7);
 }
 
 /* ---------- 2. Statement ---------- */
-.statement { text-align: center; }
+.statement {
+  /* 텍스트 블록 실제 너비 = 컨테이너의 55%와 520px 중 작은 값 */
+  --stmt-container: min(100% - var(--gutter) * 2, var(--container));
+  --stmt-text-w: min(var(--stmt-container) * 0.55, 520px);
+  /* 농가: 50vw까지 키우되 텍스트 오른쪽 끝과 64px 이상 띄우고, 높이는 섹션(최소 90svh)의 75% 이하 */
+  --farm-w: min(
+    50vw,
+    100% - (100% - var(--stmt-container)) / 2 - var(--stmt-text-w) - 64px,
+    90svh * 0.75 * 1063 / 676
+  );
+  --farm-h: calc(var(--farm-w) * 676 / 1063);
+  /* 가지: 위 8%·왼쪽 5%만 화면 밖으로 밀어, 줄기가 모서리에서 대각선으로 뻗어 나오는 게 보이게.
+     너비는 28vw까지, 단 가지 끝(보이는 아래끝 + 흔들림 약 2.5%)과 가운데 정렬된 텍스트 사이 40px 이상이 되도록 줄인다.
+     텍스트 블록 위끝 ≈ (섹션 최소 높이 90svh − 블록 높이) / 2, 블록 높이 ≈ 타이틀 3줄(1.3) + 28px + 서브 2줄 */
+  --branch-max: 28vw;
+  --stmt-text-top: calc((90svh - var(--fs-title) * 3.9 - 91px) / 2);
+  --branch-w: min(var(--branch-max), (var(--stmt-text-top) - 40px) / 0.6387);
+  --branch-h: calc(var(--branch-w) * 585 / 877);
+  --branch-shift-x: -5%;
+  --branch-shift-y: -8%;
+  --farm-opacity: 0.6;
+  --branch-opacity: calc(var(--farm-opacity) - 0.1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 90svh;
+  overflow: hidden;
+}
+/* 텍스트 블록은 섹션 세로 정중앙. 안전장치로 가지 끝(흔들림 포함)과 40px보다 가까워지면 텍스트를 내린다 */
+.statement::before,
+.statement::after {
+  content: "";
+  flex: 1 1 0;
+}
+.statement::before { min-height: max(0px, var(--branch-h) * 0.92 + var(--branch-w) * 0.025 + 40px - var(--section-y)); }
+.statement .container {
+  position: relative;
+  z-index: 1;
+}
+.statement-text {
+  max-width: var(--stmt-text-w);
+}
 .statement .section-sub {
-  max-width: 34em;
-  margin: 28px auto 0;
+  max-width: 520px;
+  margin-top: 28px;
+}
+.nowrap { white-space: nowrap; }
+/* 왼쪽 위 사과나무 가지. 위 8%·왼쪽 5%를 화면 밖으로 밀어 덜 튀게.
+   흔들림 축은 가지 이미지의 왼쪽 위 모서리 */
+.statement-branch {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  display: block;
+  width: var(--branch-w);
+  height: auto;
+  translate: var(--branch-shift-x) var(--branch-shift-y);
+  opacity: var(--branch-opacity);
+  transform-origin: 0 0;
+  pointer-events: none;
+  animation: branch-sway 7s ease-in-out infinite;
+}
+@keyframes branch-sway {
+  0%, 100% { rotate: 0deg; }
+  25% { rotate: 1.5deg; }
+  75% { rotate: -1.5deg; }
+}
+.statement-farm {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  display: block;
+  width: var(--farm-w);
+  height: auto;
+  opacity: var(--farm-opacity);
+  pointer-events: none;
 }
 
 /* ---------- Frame (3, 9) ---------- */
 .frame {
+  position: relative;
+  isolation: isolate;
   padding: var(--frame);
   background: var(--apple);
 }
 .frame-panel {
+  position: relative;
   background: var(--cream);
   border-radius: var(--radius-panel);
 }
@@ -373,66 +732,289 @@ em { font-style: normal; }
   width: min(100% - var(--gutter) * 2, var(--container));
 }
 
-/* ---------- 3. The year ---------- */
-.seasons {
+/* ---------- 3. The year (동화책, StPageFlip) ---------- */
+.year {
+  position: relative;
+  isolation: isolate;
+  background: var(--apple);
+}
+/* JS·라이브러리가 없으면 페이지를 펼침면 모양으로 위아래로 쌓아 보여 준다 */
+.year-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--section-y) var(--gutter);
+}
+.book {
+  /* 펼친 책 최대 1100px, 화면 너비·높이 안에 들어오게. 펼침면 1.55 : 1 (한쪽 페이지 0.775 : 1) */
+  --book-w: min(1100px, 100vw - var(--gutter) * 2 - 24px, (100svh - var(--header-h) - 96px) * 1.55);
+  --page-pad: 48px;
+  --stack-paper: var(--cream);
+  --stack-line: #DCCBB4;
+  position: relative;
+  width: var(--book-w);
+}
+.book-flip {
+  position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: 1fr 1fr;
 }
-.season-card {
+.book-flip > .page { position: relative; aspect-ratio: 0.775; }
+/* 모서리: 라이브러리 페이지 틀(.page = .stf__item), 안쪽 요소, 종이 묶음 모두 같은 값.
+   표지는 바깥쪽 10px · 책등 쪽 3px, 속지는 바깥쪽 8px · 가운데 접힌 쪽 0 */
+.book {
+  --r-cover: 10px;
+  --r-spine: 3px;
+  --r-page: 8px;
+}
+.book-flip .page { overflow: hidden; }
+.book-flip .page--cover-front { border-radius: var(--r-spine) var(--r-cover) var(--r-cover) var(--r-spine); }
+.book-flip .page--cover-back { border-radius: var(--r-cover) var(--r-spine) var(--r-spine) var(--r-cover); }
+.book-flip .page--left { border-radius: var(--r-page) 0 0 var(--r-page); background: var(--cream); }
+.book-flip .page--right { border-radius: 0 var(--r-page) var(--r-page) 0; background: var(--cream); }
+.page-content { border-radius: inherit; }
+.book-flip > .page[data-density="hard"] { grid-column: 1 / -1; justify-self: center; width: 50%; margin-block: 24px; }
+.book-stack { display: none; }
+
+/* 속지: 라이브러리가 .page 자체 스타일을 덮어쓰므로 모양은 안쪽 .page-content에 */
+.page-content {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  padding: 14px 14px 28px;
-  border-radius: var(--radius-card);
-  background: var(--cream-deep);
+  justify-content: center;
+  padding: var(--page-pad);
+  background: var(--cream);
+  color: var(--ink);
+  overflow: hidden;
 }
-.season-photo {
-  aspect-ratio: 1;
-  border-radius: 12px;
+/* 가운데 접힌 자국 */
+.page-content--left::after,
+.page-content--right::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 64px;
+  pointer-events: none;
 }
-.season-body {
-  display: flex;
-  flex-direction: column;
+.page-content--left::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(43, 29, 26, 0.14), rgba(43, 29, 26, 0.04) 40%, rgba(43, 29, 26, 0));
+}
+.page-content--right::after {
+  left: 0;
+  background: linear-gradient(to right, rgba(43, 29, 26, 0.14), rgba(43, 29, 26, 0.04) 40%, rgba(43, 29, 26, 0));
+}
+
+/* 계절 그림(book-*.webp, 계절마다 그린 농부 일러스트): 페이지 안에 꽉 차게 */
+.page-picture {
+  position: relative;
   flex: 1;
-  padding: 24px 12px 0;
+  border-radius: 12px;
+  overflow: hidden;
 }
-.season-when {
+.page-picture img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 40%;
+}
+/* book-*가 없어 히어로 계절 그림으로 대신할 때: 히어로와 달라 보이도록 앞쪽 나무 위주로 1.6배 */
+.page-picture.is-fallback img {
+  object-position: 45% 45%;
+  transform: scale(1.6);
+  transform-origin: 45% 45%;
+}
+.page-when {
   font: 600 var(--fs-small)/1.2 var(--font-en);
   letter-spacing: 0.06em;
   color: var(--apple);
 }
-.season-when + .card-title { margin-top: 8px; }
-.season-do {
+.page-title {
   margin-top: 12px;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 2.6vw, 40px);
+  font-weight: 400;
+  line-height: 1.3;
+}
+.page-do {
+  margin-top: 16px;
+  font-size: var(--fs-lead);
+  line-height: 1.75;
+}
+/* 농부의 한마디: 왼쪽 --apple 세로선 */
+.page-quote {
+  margin-top: 20px;
+  padding-left: 14px;
+  border-left: 3px solid var(--apple);
+  font-size: var(--fs-body);
+  line-height: 1.7;
   color: var(--ink-soft);
 }
-.season-result {
-  margin-top: auto;
+.page-result {
+  margin-top: 24px;
   padding-top: 20px;
   border-top: 1.5px dashed var(--ink-faint);
+  font-size: var(--fs-lead);
   font-weight: 700;
-  color: var(--ink);
 }
-.season-do + .season-result { margin-top: 20px; }
-/* 카드 높이를 맞추면서 결과 줄은 아래에 정렬 */
-.season-body > .season-do { flex: 1; }
 
-.year-outro {
-  display: flex;
-  justify-content: center;
+/* ---------- 앞·뒤표지: 따뜻한 갈색 천 하드커버, 솜이 든 듯 도톰하게 (차분하게) ---------- */
+.book-cover {
+  /* 기존 #8A5A3B에서 명도 약 5% ↑, 채도 약 5% ↓ */
+  --cover: #8F5F40;
   align-items: center;
-  gap: 14px;
-  margin-top: 64px;
-  font-family: var(--font-display);
-  font-size: clamp(24px, 2.2vw, 30px);
-  line-height: 1.4;
+  justify-content: center;
   text-align: center;
+  color: var(--cream);
+  /* 갈색 60% + 질감 multiply = 질감 opacity 약 0.4 (결은 보이되 거칠지 않게) */
+  background:
+    linear-gradient(rgba(143, 95, 64, 0.6), rgba(143, 95, 64, 0.6)),
+    url("asset/fabric-texture.webp") 0 0 / 720px auto repeat,
+    var(--cover);
+  background-blend-mode: normal, multiply;
+  /* 도톰한 패딩: 위·왼쪽 가장자리는 은은하게 밝고, 안쪽으로 둥글게 그늘 */
+  box-shadow:
+    inset 0 0 0 1px rgba(40, 20, 10, 0.24),
+    inset 2px 2px 0 rgba(255, 236, 214, 0.14),
+    inset 10px 12px 24px -10px rgba(255, 230, 200, 0.16),
+    inset -14px -16px 30px -8px rgba(40, 18, 8, 0.32);
 }
-.year-outro-icon {
-  flex: none;
-  width: 40px;
-  height: 40px;
-  color: var(--apple);
+/* 가장자리 14px 안쪽 크림색 점선 박음질 (1.5px, 50%) */
+.cover-stitch {
+  position: absolute;
+  inset: 14px;
+  width: calc(100% - 28px);
+  height: calc(100% - 28px);
+  overflow: visible;
+  pointer-events: none;
+}
+.cover-stitch rect {
+  fill: none;
+  stroke: rgba(255, 248, 238, 0.5);
+  stroke-width: 1.5;
+  stroke-dasharray: 8 6;
+}
+/* 사과 → 타이틀 → 서브를 한 그룹으로, 표지 세로 중앙보다 살짝 위에 */
+.cover-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 12%;
+}
+/* 표지에 박음질해 붙인 와펜: 아주 옅은 그림자. 표지 너비(= 한쪽 페이지 너비) 기준 앞표지 약 22%, 뒤표지 약 15% */
+.book { --page-w: calc(var(--book-w) / 2); }
+.cover-patch {
+  position: relative;
+  width: calc(var(--page-w) * 0.22);
+  height: auto;
+  rotate: -6deg;
+  filter: drop-shadow(0 1px 1px rgba(30, 14, 6, 0.25)) drop-shadow(0 4px 8px rgba(30, 14, 6, 0.14));
+}
+.cover-patch--small { width: calc(var(--page-w) * 0.15); }
+/* 타이틀: 크림 한 가지 색, 섹션 타이틀보다 약 15% 작게. 음각은 거의 안 보일 만큼만 */
+.cover-title {
+  position: relative;
+  margin-top: 32px;
+  font-size: calc(var(--fs-title) * 0.85);
+  color: var(--cream);
+  text-shadow: 0 1px 0 rgba(40, 18, 8, 0.12);
+}
+.cover-sub {
+  position: relative;
+  margin-top: 20px;
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  color: rgba(255, 248, 238, 0.75);
+}
+.cover-logo {
+  font: 800 16px/1 var(--font-en);
+  letter-spacing: 0.06em;
+  color: rgba(255, 248, 238, 0.85);
+}
+.book-cover--front .cover-logo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--page-pad) - 2px);
+}
+.book-cover--back .cover-logo { position: relative; margin-top: 20px; }
+/* "넘겨 보라" 신호: 오른쪽 아래 작은 화살표가 살짝 움직인다 */
+.page-hint {
+  position: absolute;
+  right: calc(var(--page-pad) - 4px);
+  bottom: calc(var(--page-pad) - 12px);
+  width: 34px;
+  height: auto;
+  color: rgba(255, 248, 238, 0.6);
+  animation: page-hint 1.6s ease-in-out infinite;
+}
+@keyframes page-hint {
+  0%, 100% { translate: 0 0; opacity: 0.7; }
+  50% { translate: 8px 0; opacity: 1; }
+}
+
+/* 펼친 책이 좁을 때(태블릿) 글이 페이지를 넘치지 않도록 여백과 글자를 줄인다 */
+.book { container-type: inline-size; }
+@container (max-width: 900px) {
+  .page-content { padding: 28px; }
+  .page-title { font-size: 26px; }
+  .page-do, .page-result { font-size: var(--fs-body); line-height: 1.65; }
+  .page-quote { font-size: var(--fs-small); }
+  .page-do { margin-top: 10px; }
+  .page-quote { margin-top: 14px; }
+  .page-result { margin-top: 16px; padding-top: 14px; }
+}
+
+/* ---------- 책 모드 (script.js가 .is-book 부여): 화면에 고정된 무대 위 한 권 ---------- */
+/* 무대는 화면 맨 위부터 전체 높이로 고정 — 헤더가 숨어도 위에 빈 띠가 생기지 않고, 헤더가 보일 때는 그 아래 빨강 위에 얹힌다.
+   책 높이는 (화면 − 헤더 − 96px) 이하라 가운데 정렬해도 헤더에 가리지 않는다 */
+.year.is-book .year-stage {
+  justify-content: center;
+  height: 100svh;
+  padding: 0 var(--gutter);
+  /* 고정된 동안 뒤 질감이 미끄러지지 않도록 무대에 같은 원단 빨강을 직접 깐다 (색 50% + 질감 multiply = 질감 opacity 0.5) */
+  background:
+    linear-gradient(rgba(200, 32, 47, 0.5), rgba(200, 32, 47, 0.5)),
+    url("asset/fabric-texture.webp") 0 0 / 720px auto repeat,
+    var(--apple);
+  background-blend-mode: normal, multiply;
+  overflow: hidden;
+}
+.year.is-book .book { height: calc(var(--book-w) / 1.55); }
+.year.is-book .book-flip {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* 빨간 바탕 위에 놓인 책의 부드러운 그림자 (보이는 종이 모양을 따라감) */
+  filter: drop-shadow(0 22px 20px rgba(60, 6, 14, 0.36)) drop-shadow(0 6px 8px rgba(60, 6, 14, 0.2));
+}
+.year.is-book .book-flip > .page { aspect-ratio: auto; width: auto; margin: 0; }
+/* 클릭으로도 넘긴다 (오른쪽 → 다음, 왼쪽 → 이전) */
+.year.is-book .book-flip { cursor: pointer; }
+/* 라이브러리 그림자 보정: 표지(하드)는 약하게(0.4 × 0.5 = 0.2), 위아래 끝은 흐리게 풀어 각진 사각형이 보이지 않게 */
+.year.is-book .stf__hardShadow,
+.year.is-book .stf__hardInnerShadow {
+  opacity: 0.5;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);
+}
+/* 표지가 열리고 닫힐 때는 한쪽이 비어 있어 바깥 그림자가 빨간 바탕에 덩어리로 떨어지므로 끄고, 책 그림자(drop-shadow)만 남긴다 */
+.year.is-book .book.is-cover-turn .stf__hardShadow { display: none !important; }
+/* 종이 묶음: 표지·페이지 바로 뒤(아래 레이어)에 깔려 바깥쪽·아래쪽으로만 몇 px 보인다 (script.js가 위치·두께 지정) */
+.year.is-book .book-stack {
+  position: absolute;
+  z-index: 0;
+  display: block;
+  overflow: hidden;
+  background: var(--stack-paper);
+  transition: box-shadow 0.3s ease;
 }
 
 /* ---------- 4. Story ---------- */
@@ -454,18 +1036,36 @@ em { font-style: normal; }
   font-weight: 700;
 }
 
-.story-photos {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  align-items: start;
+/* 가족사진 일러스트 1장: 카드·radius 없이 가장자리 약 10%를 투명하게 풀어 크림 바탕에 번지게, 살짝 기울여 둔다 */
+.story-figure {
+  justify-self: center;
+  width: 90%;
+  max-width: 560px;
+  aspect-ratio: 4 / 5;
+  rotate: -1deg;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 10%, #000 90%, transparent),
+    linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent, #000 10%, #000 90%, transparent),
+    linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent);
+  mask-composite: intersect;
 }
-.story-photo {
-  aspect-ratio: 3 / 4;
-  border-radius: var(--radius-card);
+.story-figure img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-.story-photo:nth-child(2) { margin-top: 96px; }
-.story-photo:nth-child(3) { margin-top: 40px; }
+/* 섹션에 들어오면 페이드인 + 아래에서 24px 올라오며 기울기가 -2° → -1°로 풀린다 (1회) */
+.js .story-figure.reveal {
+  transform: translateY(24px);
+  rotate: -2deg;
+  transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out), rotate 1.2s var(--ease-out);
+  transition-delay: calc(var(--d, 0) * 90ms);
+}
+.js .story-figure.reveal.is-visible { transform: none; rotate: -1deg; }
 
 /* ---------- 5. Varieties ---------- */
 .variety-grid {
@@ -741,16 +1341,50 @@ em { font-style: normal; }
   opacity: 1;
   transform: none;
 }
+/* 농가: 24px 아래에서 올라오며 --farm-opacity까지만 페이드인 */
+.js .statement-farm.reveal { transform: translateY(24px); }
+.js .statement-farm.reveal.is-visible { opacity: var(--farm-opacity); transform: none; }
+/* 가지: 위에서 살짝 내려오며 --branch-opacity까지 페이드인, 들어온 뒤부터 흔들림.
+   가지는 대부분 화면 밖이라 자체 리빌이 안 걸릴 수 있어, 타이틀이 나타날 때 함께 등장시킨다 */
+.js .statement-branch {
+  opacity: 0;
+  transform: translateY(-24px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  animation: none;
+}
+.js .statement:has(.roll-title.is-visible) .statement-branch {
+  opacity: var(--branch-opacity);
+  transform: none;
+  animation: branch-sway 7s ease-in-out 0.7s infinite;
+}
+/* 타이틀: 글자가 왼쪽에서 오른쪽으로 데굴데굴 굴러 들어온다 (script.js가 글자를 나눔) */
+.js .roll-title.reveal { opacity: 1; transform: none; }
+.roll-word { display: inline-block; white-space: nowrap; }
+.roll-char { display: inline-block; }
+.js .roll-char {
+  opacity: 0;
+  transform: translateX(-2.4em) rotate(-360deg);
+  transform-origin: 50% 55%;
+}
+.js .roll-title.is-visible .roll-char {
+  animation: char-roll 0.9s cubic-bezier(0.22, 0.9, 0.3, 1) calc(var(--i) * 45ms) forwards;
+}
+@keyframes char-roll {
+  0% { opacity: 0; transform: translateX(-2.4em) rotate(-360deg); }
+  25% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
 /* 스탬프는 회전값을 rotate 속성으로 따로 두어 리빌 transform과 겹치지 않게 한다 */
 
 /* ---------- Responsive (다음 단계에서 다듬음) ---------- */
 @media (max-width: 1024px) {
   :root { --gutter: 40px; }
-  .header-nav { display: none; }
-  .header-inner { grid-template-columns: auto 1fr; }
-  .seasons { grid-template-columns: repeat(2, 1fr); }
   .stamps { grid-template-columns: repeat(2, 1fr); row-gap: 48px; }
   .story-grid, .contact-grid { grid-template-columns: 1fr; gap: 56px; }
+}
+
+@media (max-width: 1280px) {
+  .statement { --branch-max: 22vw; }
 }
 
 @media (max-width: 760px) {
@@ -759,16 +1393,51 @@ em { font-style: normal; }
     --section-y: 72px;
     --frame: 12px;
   }
-  .site-header { padding: 14px 20px; }
+  /* 헤더 64px: 로고 + 햄버거만 (납품 문의는 메뉴 안에) */
+  .site-header { height: 64px; padding: 0 20px; }
+  .logo { font-size: 19px; gap: 8px; }
+  .logo-patch { height: 26px; }
+  .header-cta { display: none; }
+  .menu-toggle { width: 44px; height: 44px; }
+  .menu-toggle-line { right: 10.5px; }
+  .menu-toggle-line:first-child { top: 15.5px; }
+  .menu-toggle-line:last-child { top: 22.5px; }
+  .menu-toggle[aria-expanded="true"] .menu-toggle-line { top: 19px; }
+  .menu-panel { --menu-x: 56px; }
+  .menu-nav { top: calc(var(--header-h) + 4vh); }
+  .menu-link { font-size: clamp(28px, 8vw, 34px); }
+  .menu-tree { right: 4vw; height: 30svh; }
+  /* 연락처는 나무 바로 위에 (겹치지 않게) */
+  .menu-contact { bottom: calc(30svh + 20px); font-size: var(--fs-small); }
+  .statement { --farm-w: 85vw; min-height: 0; }
+  .statement::before, .statement::after { content: none; }
+  .statement-branch { display: none; }
+  .statement-text { max-width: none; }
+  /* 모바일은 텍스트 아래에 농가: 농가 높이 + 32px만큼 자리를 비워 겹치지 않게 */
+  .statement .container { margin-bottom: max(0px, var(--farm-h) + 32px - var(--section-y)); }
   .hero { grid-template-columns: 1fr; grid-template-rows: 60svh 40svh; height: auto; min-height: 0; }
   .hero-right { order: -1; }
-  .hero-left { padding: 24px; }
-  .patch-float { width: min(40vw, 24svh); }
   .hero-copy { left: 20px; right: 20px; bottom: 32px; }
-  .seasons, .variety-grid, .stamps { grid-template-columns: 1fr; }
+  .variety-grid, .stamps { grid-template-columns: 1fr; }
+  /* 3번: 한 페이지씩 넘기는 책 (라이브러리 portrait 모드) — 그림 한 장, 글 한 장씩 이어진다 */
+  .book {
+    --book-w: min(100vw - var(--gutter) * 2, (100svh - var(--header-h) - 72px) * 0.775);
+    --page-pad: 24px;
+  }
+  .year.is-book .book { height: calc(var(--book-w) / 0.775); }
+  .book { --page-w: var(--book-w); }
+  .book-flip { grid-template-columns: 1fr; }
+  .book-flip > .page[data-density="hard"] { width: 100%; }
+  .page-title { margin-top: 8px; }
+  .page-do { margin-top: 10px; font-size: var(--fs-body); line-height: 1.7; }
+  .page-result { margin-top: 16px; padding-top: 14px; font-size: var(--fs-body); }
+  .cover-stitch { inset: 10px; width: calc(100% - 20px); height: calc(100% - 20px); }
+  .cover-title { margin-top: 24px; }
+  .cover-sub { margin-top: 14px; }
+  .page-hint { right: 30px; bottom: 24px; width: 28px; }
   .field-row { grid-template-columns: 1fr; }
   .review-card { width: 300px; }
-  .story-photo:nth-child(n) { margin-top: 0; }
+  .story-figure { width: min(90vw, 100%); max-width: none; }
 }
 
 /* ---------- Reduced motion ---------- */
@@ -779,4 +1448,8 @@ em { font-style: normal; }
     transition: none !important;
   }
   .js .reveal { opacity: 1; transform: none; }
+  .js .statement-farm.reveal { opacity: var(--farm-opacity); transform: none; }
+  .js .story-figure.reveal { rotate: -1deg; }
+  .js .statement-branch { opacity: var(--branch-opacity); transform: none; }
+  .js .roll-char { opacity: 1; transform: none; }
 }
