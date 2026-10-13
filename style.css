@@ -631,6 +631,42 @@ html.is-menu-locked {
   to   { transform: translateX(2%) scale(1.06); }
 }
 
+/* WebGL 디졸브: 두 계절을 한 캔버스에 같은 크롭(위 object-position과 같은 계산, script.js)으로 그린다.
+   좌→우 이동은 캔버스 자체에 걸어 두 이미지가 항상 함께 움직이고, 전환과 상관없이 끊기지 않게 천천히 왕복한다 */
+.hero-gl {
+  position: absolute;
+  inset: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+  transform-origin: 100% 0;
+  transform: translateX(0.5%) scale(1.03);
+  animation: hero-drift-loop 14.4s ease-in-out infinite alternate; /* 네 계절 한 바퀴(4 × 3.6초)마다 방향 전환 */
+}
+.hero-right.is-gl .hero-gl { display: block; }
+.hero-right.is-gl .hero-slide { visibility: hidden; }
+.hero-right.is-paused .hero-gl { animation-play-state: paused; }
+@keyframes hero-drift-loop {
+  from { transform: translateX(0.5%) scale(1.03); }
+  to   { transform: translateX(2%) scale(1.06); }
+}
+/* 전환 중 흩날리는 계절 입자: 사진 위, 헤드라인(.hero-copy z 4) 뒤 */
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hero-particle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  will-change: transform, opacity;
+}
+
 .hero-copy {
   position: absolute;
   left: 56px;
@@ -1694,8 +1730,9 @@ html.is-menu-locked {
   outline-color: var(--apple);
   box-shadow: 0 0 0 3px rgba(255, 248, 238, 0.4);
 }
+/* 제출 버튼: 입력칸 오른쪽 끝 라인에 맞춤, 문의 내용과 28px (폼 gap 20px + 8px) */
 .contact-form .btn {
-  justify-self: start;
+  justify-self: end;
   margin-top: 8px;
 }
 
@@ -1726,19 +1763,6 @@ html.is-menu-locked {
   transform: rotate(var(--tilt));
   animation: apple-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards;
 }
-
-/* ---------- Footer ---------- */
-.site-footer { padding-block: 48px; }
-.footer-inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px 32px;
-  font-size: var(--fs-small);
-  color: var(--ink-soft);
-}
-.logo--footer { font-size: 20px; }
 
 /* ---------- Reveal ---------- */
 .js .reveal {
@@ -1854,8 +1878,9 @@ html.is-menu-locked {
   .page-hint { right: 30px; bottom: 24px; width: 28px; }
   .field-row { grid-template-columns: 1fr; }
   .review-card { width: 300px; }
-  /* 문의: 글 → 폼 → 나무(작게, 섹션 바닥에 붙여서) */
+  /* 문의: 글 → 폼 → 나무(작게, 섹션 바닥에 붙여서). 버튼은 폼 너비 100% */
   .contact { padding-bottom: 0; }
+  .contact-form .btn { justify-self: stretch; }
   .contact-tree {
     --h: 220px;
     position: relative;
@@ -1881,4 +1906,5 @@ html.is-menu-locked {
   .js .story-figure.reveal { rotate: -1deg; }
   .js .statement-branch { opacity: var(--branch-opacity); transform: none; }
   .js .roll-char { opacity: 1; transform: none; }
+  .hero-slide { transition: opacity 0.6s ease !important; }
 }

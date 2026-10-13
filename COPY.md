@@ -200,9 +200,7 @@
 
 ## Footer
 
-- `APPLE HOUSE`
-- 경북 청송군 (가상) · 054-000-0000 · hello@applehouse.kr (가상)
-- `© 2026 APPLE HOUSE`
+- 별도 푸터 없음. 연락처(054-000-0000 · hello@applehouse.kr, 가상)는 8번 문의 섹션 왼쪽에 포함
 
 ---
 

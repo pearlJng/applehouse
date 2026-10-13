@@ -87,7 +87,11 @@
           <div class="hero-slide"><figure class="hero-media"><img src="asset/season-summer.webp" alt=""></figure></div>
           <div class="hero-slide"><figure class="hero-media"><img src="asset/season-autumn.webp" alt=""></figure></div>
           <div class="hero-slide"><figure class="hero-media"><img src="asset/season-winter.webp" alt=""></figure></div>
+          <!-- WebGL 디졸브 (script.js). 쓸 수 없으면 위 슬라이드 크로스페이드로 대체 -->
+          <canvas class="hero-gl"></canvas>
         </div>
+        <!-- 전환 중 새 계절 입자 (헤드라인 뒤) -->
+        <div class="hero-particles" aria-hidden="true"></div>
         <div class="hero-copy">
           <h1 class="hero-title">사과 한 알에,<br><em>일 년이</em> 들어 있어요.</h1>
           <p class="hero-sub">경북 청송, 3대째 사과를 키우는 애플하우스입니다.</p>
@@ -498,14 +502,6 @@
 
   </main>
 
-  <!-- Footer -->
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p class="logo logo--footer">APPLE HOUSE</p>
-      <p class="footer-contact">경북 청송군 · 054-000-0000 · hello@applehouse.kr</p>
-      <p class="footer-copy">© 2026 APPLE HOUSE</p>
-    </div>
-  </footer>
 
 </body>
 </html>

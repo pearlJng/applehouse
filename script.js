@@ -125,15 +125,345 @@
     };
   };
 
-  const rotators = [
-    createRotator([...document.querySelectorAll('.hero-slide')], 6000, 1200),
-  ];
+  /* ---------- 히어로 오른쪽: 계절 디졸브 (WebGL) ---------- */
+  // 다음 계절이 노이즈 얼룩을 따라 군데군데 먼저 스며들고 얼룩이 넓어지며 화면을 덮는다 (부드러운 가장자리 약 10%).
+  // 한 계절 1.8초 머물고 1.8초 동안 전환(power1.inOut), 전환마다 노이즈 seed가 바뀐다. 전환 시작부터 약 2초 새 계절 입자가 흩날린다.
+  // WebGL이 없으면 기존 크로스페이드(6초 · 1.2초), 모션 줄이기면 6초마다 0.6초 크로스페이드만
+  const heroRight = document.querySelector('.hero-right');
+  const heroSlides = [...document.querySelectorAll('.hero-slide')];
+  const SEASON_SRC = ['spring', 'summer', 'autumn', 'winter'].map((k) => `asset/season-${k}.webp`);
+  const HOLD_MS = 1800; // 한 계절에 머무는 시간 (1.5~2초)
+  const DISSOLVE_MS = 1800;
 
-  const syncMotion = () => {
-    rotators.forEach((r) => (reduceMotion.matches ? r.stop() : r.start()));
+  const startCrossfade = (prevMs) => {
+    heroRight.classList.remove('is-gl');
+    createRotator(heroSlides, 6000, prevMs).start();
   };
-  syncMotion();
-  reduceMotion.addEventListener('change', syncMotion);
+
+  const VERT = 'attribute vec2 aPos; varying vec2 vUv; void main(){ vUv = vec2(aPos.x * 0.5 + 0.5, 0.5 - aPos.y * 0.5); gl_Position = vec4(aPos, 0.0, 1.0); }';
+  const FRAG = `
+    #ifdef GL_FRAGMENT_PRECISION_HIGH
+    precision highp float;
+    #else
+    precision mediump float;
+    #endif
+    varying vec2 vUv;
+    uniform sampler2D uA;
+    uniform sampler2D uB;
+    uniform float uP;
+    uniform vec2 uSeed;
+    uniform vec2 uRes;
+    uniform vec2 uScale;
+    uniform vec2 uOffset;
+    float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float noise(vec2 p) {
+      vec2 i = floor(p); vec2 f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);
+      return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+    }
+    float fbm(vec2 p) {
+      float v = 0.0; float a = 0.5;
+      for (int i = 0; i < 5; i++) { v += a * noise(p); p = p * 2.03 + 17.0; a *= 0.5; }
+      return v;
+    }
+    void main() {
+      vec2 iuv = (vUv - uOffset) / uScale;
+      vec4 a = texture2D(uA, iuv);
+      vec4 b = texture2D(uB, iuv);
+      float n = fbm(vUv * vec2(uRes.x / uRes.y, 1.0) * 2.6 + uSeed);
+      n = clamp((n - 0.18) / 0.64, 0.0, 1.0);
+      float e = 0.1;
+      float t = uP * (1.0 + e);
+      float m = 1.0 - smoothstep(t - e, t, n);
+      gl_FragColor = mix(a, b, m);
+    }`;
+
+  const initHeroGL = (images) => {
+    const canvas = heroRight.querySelector('.hero-gl');
+    const gl = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: true });
+    if (!gl) return null;
+    const compile = (type, src) => {
+      const sh = gl.createShader(type);
+      gl.shaderSource(sh, src);
+      gl.compileShader(sh);
+      return gl.getShaderParameter(sh, gl.COMPILE_STATUS) ? sh : null;
+    };
+    const vs = compile(gl.VERTEX_SHADER, VERT);
+    const fs = compile(gl.FRAGMENT_SHADER, FRAG);
+    if (!vs || !fs) return null;
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const aPos = gl.getAttribLocation(prog, 'aPos');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    let textures;
+    try {
+      textures = images.map((img) => {
+      const tex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+      return tex;
+      });
+    } catch (err) {
+      return null; // file:// 로 열면 보안 정책상 로컬 이미지를 텍스처로 못 올린다 → Canvas 2D로
+    }
+    if (gl.getError() !== gl.NO_ERROR) return null;
+    const u = (name) => gl.getUniformLocation(prog, name);
+    const loc = { a: u('uA'), b: u('uB'), p: u('uP'), seed: u('uSeed'), res: u('uRes'), scale: u('uScale'), offset: u('uOffset') };
+    gl.uniform1i(loc.a, 0);
+    gl.uniform1i(loc.b, 1);
+
+    // object-fit: cover + object-position: 100% max(100%, 24px - 41.25cqw) 와 같은 크롭 (cqw = 오른쪽 면 너비)
+    const iw = images[0].naturalWidth;
+    const ih = images[0].naturalHeight;
+    const resize = () => {
+      const w = heroRight.clientWidth;
+      const h = heroRight.clientHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      const k = Math.max(w / iw, h / ih);
+      const dw = iw * k;
+      const dh = ih * k;
+      const ox = w - dw;
+      const oy = Math.max(h - dh, 24 - 0.4125 * w);
+      gl.uniform2f(loc.res, w, h);
+      gl.uniform2f(loc.scale, dw / w, dh / h);
+      gl.uniform2f(loc.offset, ox / w, oy / h);
+    };
+    const draw = (from, to, p, seed) => {
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, textures[from]);
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, textures[to]);
+      gl.uniform1f(loc.p, p);
+      gl.uniform2f(loc.seed, seed[0], seed[1]);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    };
+    return { resize, draw };
+  };
+
+  // 같은 디졸브를 Canvas 2D로: 노이즈 값을 작은 격자로 계산해 두고, 매 프레임 smoothstep 마스크(작은 캔버스)를
+  // 부드럽게 확대해 다음 계절 이미지를 오려 덮는다. 이미지 픽셀을 읽지 않으므로 file:// 에서도 동작한다
+  const initHero2D = (images) => {
+    // WebGL을 한 번 시도한 캔버스는 2D 컨텍스트를 못 얻으므로 새 캔버스로 바꿔 끼운다
+    const old = heroRight.querySelector('.hero-gl');
+    const canvas = old.cloneNode(false);
+    old.replaceWith(canvas);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    const layer = document.createElement('canvas');
+    const lctx = layer.getContext('2d');
+    const mask = document.createElement('canvas');
+    const mctx = mask.getContext('2d');
+    const iw = images[0].naturalWidth;
+    const ih = images[0].naturalHeight;
+    let crop = null;
+    let field = null;
+    let fieldSeed = null;
+    let mw = 0;
+    let mh = 0;
+    const hash = (x, y, sx, sy) => {
+      const v = Math.sin((x + sx) * 127.1 + (y + sy) * 311.7) * 43758.5453;
+      return v - Math.floor(v);
+    };
+    const vnoise = (x, y, sx, sy) => {
+      const ix = Math.floor(x);
+      const iy = Math.floor(y);
+      const fx = x - ix;
+      const fy = y - iy;
+      const ux = fx * fx * (3 - 2 * fx);
+      const uy = fy * fy * (3 - 2 * fy);
+      const a = hash(ix, iy, sx, sy);
+      const b = hash(ix + 1, iy, sx, sy);
+      const c = hash(ix, iy + 1, sx, sy);
+      const d = hash(ix + 1, iy + 1, sx, sy);
+      return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
+    };
+    const buildField = (seed) => {
+      field = new Float32Array(mw * mh);
+      const aspect = canvas.width / canvas.height;
+      for (let y = 0; y < mh; y += 1) {
+        for (let x = 0; x < mw; x += 1) {
+          let px = (x / mw) * aspect * 2.6;
+          let py = (y / mh) * 2.6;
+          let v = 0;
+          let amp = 0.5;
+          for (let o = 0; o < 5; o += 1) {
+            v += amp * vnoise(px, py, seed[0], seed[1]);
+            px = px * 2.03 + 17;
+            py = py * 2.03 + 17;
+            amp *= 0.5;
+          }
+          field[y * mw + x] = Math.min(1, Math.max(0, (v - 0.18) / 0.64));
+        }
+      }
+      fieldSeed = seed;
+    };
+    const resize = () => {
+      const w = heroRight.clientWidth;
+      const h = heroRight.clientHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = layer.width = Math.round(w * dpr);
+      canvas.height = layer.height = Math.round(h * dpr);
+      const k = Math.max(w / iw, h / ih);
+      crop = { x: (w - iw * k) * dpr, y: Math.max(h - ih * k, 24 - 0.4125 * w) * dpr, w: iw * k * dpr, h: ih * k * dpr };
+      mw = 160;
+      mh = Math.round(160 * (h / w));
+      mask.width = mw;
+      mask.height = mh;
+      field = null;
+    };
+    const draw = (from, to, p, seed) => {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(images[from], crop.x, crop.y, crop.w, crop.h);
+      if (p <= 0) return;
+      if (!field || fieldSeed !== seed) buildField(seed);
+      const img = mctx.createImageData(mw, mh);
+      const e = 0.1;
+      const t = p * (1 + e);
+      for (let i = 0; i < field.length; i += 1) {
+        const k = Math.min(1, Math.max(0, (field[i] - (t - e)) / e));
+        img.data[i * 4 + 3] = (1 - k * k * (3 - 2 * k)) * 255;
+      }
+      mctx.putImageData(img, 0, 0);
+      lctx.globalCompositeOperation = 'source-over';
+      lctx.clearRect(0, 0, layer.width, layer.height);
+      lctx.drawImage(images[to], crop.x, crop.y, crop.w, crop.h);
+      lctx.globalCompositeOperation = 'destination-in';
+      lctx.imageSmoothingEnabled = true;
+      lctx.imageSmoothingQuality = 'high';
+      lctx.drawImage(mask, 0, 0, layer.width, layer.height);
+      ctx.drawImage(layer, 0, 0);
+    };
+    return { resize, draw };
+  };
+
+  // 계절 입자: 일러스트와 같은 납작한 SVG 도형
+  const PARTICLES = [
+    { colors: ['#F7C9CF', '#F3B2BC', '#FADADD'], svg: (c) => `<svg viewBox="0 0 20 20"><path d="M10 1C14 5 15 11 10 19 5 11 6 5 10 1Z" fill="${c}"/></svg>`, size: [12, 18] },
+    { colors: ['#A9C77A', '#93B866', '#BFD68F'], svg: (c) => `<svg viewBox="0 0 20 20"><path d="M3 17C3 8 9 3 18 2 17 11 12 17 3 17Z" fill="${c}"/><path d="M4 16 13 7" stroke="rgba(60,80,30,.35)" stroke-width="1" fill="none"/></svg>`, size: [14, 20] },
+    { colors: ['#E08A3C', '#C9692E', '#A8673A', '#E9A64B'], svg: (c) => `<svg viewBox="0 0 20 20"><path d="M10 1 12.5 6 18 5 15 10 19 13 13 14 12 19 10 15 8 19 7 14 1 13 5 10 2 5 7.5 6Z" fill="${c}"/></svg>`, size: [14, 22] },
+    { colors: ['#FFFFFF', '#F4F7FA'], svg: (c) => `<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="${c}" opacity=".95"/></svg>`, size: [6, 11] },
+  ];
+  const particleLayer = heroRight.querySelector('.hero-particles');
+  let particleTweens = [];
+  const spawnParticles = (season) => {
+    const { gsap } = window;
+    if (!gsap) return;
+    const kind = PARTICLES[season];
+    const W = heroRight.clientWidth;
+    const H = heroRight.clientHeight;
+    const count = window.matchMedia('(max-width: 760px)').matches ? 5 : 10;
+    for (let i = 0; i < count; i += 1) {
+      const el = document.createElement('span');
+      el.className = 'hero-particle';
+      const size = gsap.utils.random(kind.size[0], kind.size[1]);
+      el.style.width = `${size}px`;
+      el.style.height = `${size}px`;
+      el.innerHTML = kind.svg(gsap.utils.random(kind.colors));
+      particleLayer.appendChild(el);
+      const x0 = gsap.utils.random(0.08, 0.95) * W;
+      const y0 = gsap.utils.random(-0.06, 0.18) * H;
+      const fall = gsap.utils.random(0.22, 0.4) * H; // 위쪽에서만 흩날려 헤드라인(아래쪽)까지 내려가지 않게
+      const dur = gsap.utils.random(1.5, 2.1);
+      const delay = gsap.utils.random(0, 0.5);
+      const spin = gsap.utils.random(-240, 240);
+      const sway = gsap.utils.random(14, 32) * (Math.random() < 0.5 ? -1 : 1);
+      gsap.set(el, { x: x0, y: y0, rotation: gsap.utils.random(0, 360), opacity: 0 });
+      const tl = gsap.timeline({ delay, onComplete: () => { el.remove(); particleTweens = particleTweens.filter((t) => t !== tl); } })
+        .to(el, { y: y0 + fall, rotation: `+=${spin}`, duration: dur, ease: 'sine.in' }, 0)
+        .to(el, { keyframes: { x: [x0, x0 + sway, x0 - sway * 0.4, x0 + sway * 0.7] }, duration: dur, ease: 'sine.inOut' }, 0)
+        .to(el, { opacity: 0.9, duration: 0.3, ease: 'none' }, 0)
+        .to(el, { opacity: 0, duration: 0.5, ease: 'none' }, dur - 0.5);
+      particleTweens.push(tl);
+    }
+  };
+
+  const loadImage = (src) => new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+
+  if (reduceMotion.matches) {
+    startCrossfade(600);
+  } else {
+    // 4장을 미리 불러온 뒤 시작. 준비되기 전에는 첫 슬라이드(봄)가 그대로 보인다
+    Promise.all(SEASON_SRC.map(loadImage)).then((images) => {
+      const glView = initHeroGL(images) || initHero2D(images);
+      if (!glView) {
+        startCrossfade(1200);
+        return;
+      }
+      glView.resize();
+      let current = 0;
+      let seed = [Math.random() * 100, Math.random() * 100];
+      glView.draw(0, 0, 0, seed);
+      heroRight.classList.add('is-gl');
+
+      let phase = 'hold';
+      let elapsed = 0;
+      let last = performance.now();
+      let visible = true;
+      const ease = (x) => (x < 0.5 ? 2 * x * x : 1 - ((-2 * x + 2) ** 2) / 2); // power1.inOut
+
+      const setPaused = (paused) => {
+        heroRight.classList.toggle('is-paused', paused);
+        particleTweens.forEach((t) => (paused ? t.pause() : t.resume()));
+      };
+      const tick = (now) => {
+        const dt = now - last;
+        last = now;
+        if (visible && !document.hidden) {
+          elapsed += Math.min(dt, 100);
+          if (phase === 'hold' && elapsed >= HOLD_MS) {
+            phase = 'dissolve';
+            elapsed = 0;
+            seed = [Math.random() * 100, Math.random() * 100];
+            spawnParticles((current + 1) % 4);
+          }
+          if (phase === 'dissolve') {
+            const p = Math.min(1, elapsed / DISSOLVE_MS);
+            glView.draw(current, (current + 1) % 4, ease(p), seed);
+            if (p >= 1) {
+              current = (current + 1) % 4;
+              phase = 'hold';
+              elapsed = 0;
+            }
+          }
+        }
+        window.requestAnimationFrame(tick);
+      };
+      window.requestAnimationFrame(tick);
+
+      // 히어로가 화면 밖이거나 탭이 숨겨지면 전환·입자·이동 모두 멈춤
+      new IntersectionObserver((entries) => {
+        visible = entries[0].isIntersecting;
+        setPaused(!visible);
+      }).observe(heroRight);
+      document.addEventListener('visibilitychange', () => setPaused(document.hidden || !visible));
+
+      window.addEventListener('resize', () => {
+        glView.resize();
+        glView.draw(current, (current + 1) % 4, phase === 'dissolve' ? ease(Math.min(1, elapsed / DISSOLVE_MS)) : 0, seed);
+      });
+    }).catch(() => startCrossfade(1200));
+  }
 
   /* ---------- 히어로 사과 더미 (나무에 사과가 다 열린 뒤 후두둑 쏟아져 쌓임, GSAP) ---------- */
   // 자리는 미리 계산한 가로 줄로 떨어진다(물리 엔진 없음). 떨어지는 사과·쌓인 사과 모두 나무 뒤 레이어(.hero-pile)라
