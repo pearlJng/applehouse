@@ -29,7 +29,7 @@
     header.classList.remove('is-hidden');
     menuToggle.setAttribute('aria-expanded', String(open));
     menuToggle.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
-    // 열려 있는 동안 페이지 스크롤 잠금. overflow만 막아서 스크롤 위치(3번 pin 포함)는 그대로 유지된다
+    // 열려 있는 동안 페이지 스크롤 잠금. overflow만 막아서 스크롤 위치는 그대로 유지된다
     if (open) root.style.setProperty('--scrollbar-w', `${window.innerWidth - root.clientWidth}px`);
     root.classList.toggle('is-menu-locked', open);
     if (open) {
@@ -75,6 +75,77 @@
     event.preventDefault();
     if (menuOpen) setMenu(false, { restoreFocus: false });
     window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+  });
+
+  /* ---------- 맨 위로 (와펜 사과) ---------- */
+  // 히어로를 다 지나면 나타나고, 히어로가 다시 보이면 사라진다 (style.css .is-shown)
+  const toTop = document.querySelector('.to-top');
+  const toTopImg = toTop.querySelector('img');
+  const hero = document.querySelector('.hero');
+  new IntersectionObserver(([entry]) => {
+    toTop.classList.toggle('is-shown', !entry.isIntersecting && entry.boundingClientRect.top < 0);
+  }).observe(hero);
+
+  // 겹침 방지: 문의 폼 입력칸·제출 버튼, 동화책 원형 버튼·리본과 겹치면 그 구간에서만 위로 비켜 선다.
+  // 가장 가까운 빈자리까지만 올리고(최대 DODGE_MAX), 그 안에 빈자리가 없으면(모바일 폼처럼 칸이 화면 폭을 다 채운 구간) 잠시 숨긴다
+  const DODGE_MAX = 120;
+  const DODGE_MARGIN = 8;
+  const obstacleSel = '.contact-form input, .contact-form select, .contact-form textarea, .contact-form .btn, .book-nav-btn, .book-ribbon';
+  const obstacles = [...document.querySelectorAll(obstacleSel)];
+  let dodgeTicking = false;
+  const updateDodge = () => {
+    dodgeTicking = false;
+    if (!toTop.classList.contains('is-shown')) return;
+    const size = toTop.offsetWidth;
+    const gap = parseFloat(getComputedStyle(toTop).right);
+    const left = root.clientWidth - gap - size;
+    const bottom = window.innerHeight - gap;
+    // 화면에 보이는 장애물만 (숨김 상태 버튼·리본은 제외)
+    const rects = obstacles
+      .filter((el) => getComputedStyle(el).visibility === 'visible' && el.offsetParent !== null)
+      .map((el) => el.getBoundingClientRect())
+      .filter((r) => r.width && r.right > left - DODGE_MARGIN && r.left < left + size + DODGE_MARGIN);
+    let lift = 0;
+    for (let guard = 0; guard < rects.length + 1; guard += 1) {
+      const top = bottom - lift - size;
+      const hit = rects.find((r) => r.bottom > top - DODGE_MARGIN && r.top < bottom - lift + DODGE_MARGIN);
+      if (!hit) break;
+      lift = bottom - (hit.top - DODGE_MARGIN);
+    }
+    const blocked = lift > DODGE_MAX;
+    toTop.classList.toggle('is-dodged-out', blocked);
+    toTop.style.setProperty('--dodge', `${blocked ? 0 : Math.round(lift)}px`);
+  };
+  const queueDodge = () => {
+    if (dodgeTicking) return;
+    dodgeTicking = true;
+    window.requestAnimationFrame(updateDodge);
+  };
+  window.addEventListener('scroll', queueDodge, { passive: true });
+  window.addEventListener('resize', queueDodge);
+  // 동화책 버튼·리본은 스크롤 없이도 나타나고 사라진다 (넘김 상태가 바뀔 때)
+  const bookShell = document.querySelector('.book-shell');
+  if (bookShell) {
+    new MutationObserver(() => window.setTimeout(queueDodge, 700)).observe(bookShell, { attributes: true, attributeFilter: ['data-nav'] });
+  }
+  new MutationObserver(queueDodge).observe(toTop, { attributes: true, attributeFilter: ['class'] });
+
+  // 클릭: 사과가 위로 10px 톡 튀었다가 내려앉은 뒤 맨 위로 부드럽게. reduced-motion이면 바로 맨 위로
+  let toTopJumping = false;
+  toTop.addEventListener('click', () => {
+    if (reduceMotion.matches || !toTopImg.animate) {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      return;
+    }
+    if (toTopJumping) return;
+    toTopJumping = true;
+    toTopImg.animate(
+      [{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)', offset: 0.45 }, { transform: 'translateY(0)' }],
+      { duration: 280, easing: 'ease-out' },
+    ).finished.then(() => {
+      toTopJumping = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   });
 
   /* ---------- Placeholder ---------- */
@@ -467,11 +538,14 @@
 
   /* ---------- 히어로 사과 더미 (나무에 사과가 다 열린 뒤 후두둑 쏟아져 쌓임, GSAP) ---------- */
   // 자리는 미리 계산한 가로 줄로 떨어진다(물리 엔진 없음). 떨어지는 사과·쌓인 사과 모두 나무 뒤 레이어(.hero-pile)라
-  // 잎·열린 와펜 앞을 지나가지 않고, 줄기·잔디 언덕이 더미 앞에 보인다
+  // 잎·열린 사과 앞을 지나가지 않고, 줄기·잔디 언덕이 더미 앞에 보인다
   const pile = document.querySelector('.hero-pile');
   if (pile) {
     const heroPanel = pile.closest('.hero-left');
-    const APPLE_RATIO = 800 / 680; // 와펜 세로 / 가로
+    // 쌓는 자리(줄 간격·낙하 높이) 계산은 와펜 때 비율 그대로 둬서 더미 높이·레이어가 변하지 않게 한다
+    const APPLE_RATIO = 800 / 680;
+    // 장면 속 사과는 일러스트 사과 4가지 (01·03은 잎 있음). [파일 번호, 가로, 세로]
+    const ILLUST = [[1, 420, 417], [2, 420, 378], [3, 420, 367], [4, 375, 336]];
     const PILE_HEIGHT = 0.2; // 더미 윗면 = 면 높이의 20%
     const ROWS = 3;
 
@@ -497,19 +571,31 @@
       const step = (H * PILE_HEIGHT - base - h) / (ROWS - 1);
       const gap = w * 0.72;
       const list = [];
+      let prevRow = [];
       for (let row = 0; row < ROWS; row += 1) {
         const offset = (row % 2) * gap * 0.5;
+        const thisRow = [];
         for (let x = -w * 0.3 + offset; x < W + w * 0.3; x += gap) {
-          const size = w * (0.94 + rand() * 0.12);
-          list.push({
+          // 크기는 ±10%만
+          const size = w * (0.9 + rand() * 0.2);
+          // 모양은 무작위로 섞되, 같은 줄 왼쪽 이웃·바로 아래 줄에서 가장 가까운 사과와는 다른 모양
+          const below = prevRow.reduce((best, d) => (!best || Math.abs(d.cx - x) < Math.abs(best.cx - x) ? d : best), null);
+          const avoid = [thisRow.at(-1)?.illust, below?.illust];
+          const choices = ILLUST.map((_, i) => i).filter((i) => !avoid.includes(i));
+          const illust = choices[Math.floor(rand() * choices.length)];
+          const d = {
+            illust,
             cx: x + (rand() * 2 - 1) * 8,
             bottom: base + row * step + (rand() * 2 - 1) * 4,
             w: size,
             rot: (rand() * 2 - 1) * 18,
             row,
             z: 50 - row * 10 + Math.floor(rand() * 4), // 앞(아래) 줄이 위에 보이게
-          });
+          };
+          thisRow.push(d);
+          list.push(d);
         }
+        prevRow = thisRow;
       }
       return list;
     };
@@ -521,14 +607,15 @@
         const el = document.createElement('span');
         el.className = 'pile-apple';
         el.style.cssText = `left:${d.cx - d.w / 2}px;bottom:${d.bottom}px;width:${d.w}px;z-index:${d.z};--rot:${d.rot.toFixed(1)}deg`;
-        el.innerHTML = '<img src="asset/apple-patch.webp" alt="" width="680" height="800">';
+        const [n, iw, ih] = ILLUST[d.illust];
+        el.innerHTML = `<img src="asset/apple-illust-0${n}.webp" alt="" width="${iw}" height="${ih}">`;
         pile.appendChild(el);
         return { el, ...d };
       });
     };
 
     const { gsap } = window;
-    // 나무에 와펜이 거의 다 열려 갈 무렵(마지막 와펜 1.95초) 바로 시작
+    // 나무에 사과가 거의 다 열려 갈 무렵(마지막 사과 1.95초) 바로 시작
     const START_AT = 1800;
     const loadedAt = performance.now();
     let playing = false;
@@ -885,18 +972,16 @@
     track.appendChild(clone);
   });
 
-  /* ---------- 3. 사계절 동화책 (StPageFlip + GSAP ScrollTrigger) ---------- */
+  /* ---------- 3. 사계절 동화책 (StPageFlip, 클릭·드래그로 넘기기) ---------- */
   // 페이지 10장: 0 앞표지(하드) / 1·2 봄 그림·글 / 3·4 여름 / 5·6 가을 / 7·8 겨울 / 9 뒤표지(하드).
-  // 섹션을 고정하고 스크롤 한 화면마다 한 단계씩 넘긴다. 넘김은 라이브러리에 맡기고(마우스로 끌기는 끔),
-  // 단계가 바뀌는 순간 pageFlip.flip()을 한 번 호출, 넘기는 중 들어온 스크롤은 끝난 뒤 이어서 처리한다.
+  // 스크롤과는 연결하지 않는 일반 섹션. 넘김은 라이브러리 기본 마우스·터치 동작(클릭·끌기·스와이프)에 맡기고,
+  // 여기서는 hover 힌트 위치, 표지 가운데 맞추기, 종이 묶음 두께, 키보드, 이전·다음 버튼만 더한다.
   const year = document.querySelector('.year');
 
-  if (year && window.gsap && window.ScrollTrigger && window.St && window.St.PageFlip) {
-    const { gsap, ScrollTrigger } = window;
-    gsap.registerPlugin(ScrollTrigger);
+  if (year && window.gsap && window.St && window.St.PageFlip) {
+    const { gsap } = window;
     year.classList.add('is-book');
 
-    const stage = year.querySelector('.year-stage');
     const book = year.querySelector('.book');
     const flipEl = year.querySelector('.book-flip');
     const stackLeft = year.querySelector('.book-stack--left');
@@ -907,40 +992,63 @@
       width: 550,
       height: 710,
       size: 'stretch',
-      minWidth: 300,
+      // 모바일은 표지 책갈피 탭 자리만큼 책이 좁아지므로 최소 크기를 조금 낮춘다 (360px 화면에서 약 296px)
+      minWidth: 280,
       maxWidth: 550,
-      minHeight: 387,
+      minHeight: 360,
       maxHeight: 710,
       showCover: true,
       drawShadow: true,
       maxShadowOpacity: 0.4,
       flippingTime: FLIP_MS,
       usePortrait: true,
-      mobileScrollSupport: false,
-      useMouseEvents: false,
-      // 마우스 이벤트는 라이브러리에 맡기지 않고(끌어 넘기기 방지), hover 때만 userMove로 넘길 쪽 모서리 힌트를 보여 준다
+      useMouseEvents: true,
+      // 책 위에서 위아래로 밀면 페이지가 스크롤되고, 옆으로 밀 때만 넘긴다
+      mobileScrollSupport: true,
       showPageCorners: true,
-      disableFlipByClick: true,
+      clickEventForward: true,
       autoSize: false,
     });
     pageFlip.loadFromHTML([...flipEl.querySelectorAll(':scope > .page')]);
 
+    const ui = pageFlip.getUI();
+    const render = pageFlip.getRender();
+    const controller = pageFlip.getFlipController();
+    const state = () => pageFlip.getState();
+    const idleState = (now) => ['read', 'fold_corner'].includes(now);
+    const isIdle = () => idleState(state());
+
     // 단계 → 페이지 번호. 펼침(landscape)은 6단계, 한 페이지씩(portrait)은 그림·글이 각각 한 단계라 10단계
     const isPortrait = () => pageFlip.getOrientation() === 'portrait';
     const stepPages = () => (isPortrait() ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] : [0, 1, 3, 5, 7, 9]);
+    const lastStep = () => stepPages().length - 1;
+    // 지금 펼쳐진 페이지 번호 → 단계
+    const stepOfPage = (page) => stepPages().reduce((best, p, i) => (p <= page ? i : best), 0);
 
-    // 덮인 책을 화면 가운데로: 앞표지는 펼침면 오른쪽 자리라 왼쪽으로, 뒤표지는 오른쪽으로 반 페이지
-    const offsetOf = (step) => {
-      if (isPortrait()) return 0;
-      const half = pageFlip.getBoundsRect().pageWidth / 2;
-      if (step === 0) return -half;
-      if (step === stepPages().length - 1) return half;
-      return 0;
+    // 덮인 책의 위치·크기 (x, scale)
+    // - 펼침: 앞표지는 펼침면 오른쪽 자리라 왼쪽으로, 뒤표지는 오른쪽으로 반 페이지 → 표지가 화면 가운데
+    // - 한 페이지(모바일): 표지가 화면 폭을 거의 채워 옆 조작이 들어갈 자리가 없으므로, 표지 상태에서만 책을 줄이고
+    //   표지 + 옆 조작 덩어리를 화면 가운데로 (양옆 16px). 펼치면 원래 크기.
+    //   앞표지 = 오른쪽 리본(삐져나온 길이 + 당김 12px), 뒤표지 = 왼쪽 원형 이전 버튼(32px 간격 + 지름)
+    const shell = year.querySelector('.book-shell');
+    const frontRibbon = book.querySelector('.book-ribbon');
+    const RIBBON_PULL = 12;
+    const BACK_GAP = 32;
+    const placeOf = (step) => {
+      if (step !== 0 && step !== lastStep()) return { x: 0, scale: 1 };
+      const dir = step === 0 ? -1 : 1; // 옆 조작 반대쪽으로
+      const pw = pageFlip.getBoundsRect().pageWidth;
+      if (!isPortrait()) return { x: (dir * pw) / 2, scale: 1 };
+      const reach = step === 0
+        ? parseFloat(getComputedStyle(frontRibbon).getPropertyValue('--ribbon-out')) + RIBBON_PULL
+        : parseFloat(getComputedStyle(shell).getPropertyValue('--book-ctrl')) + BACK_GAP;
+      const scale = Math.min(1, (document.documentElement.clientWidth - 32 - reach) / pw);
+      return { x: (dir * reach) / 2, scale };
     };
 
     // 종이 묶음 두께(보이는 선 수, 0~5): 넘긴 만큼 왼쪽이 두꺼워지고 오른쪽이 얇아진다
     const stackOf = (step) => {
-      const last = stepPages().length - 1;
+      const last = lastStep();
       if (isPortrait()) return step === last ? { left: 0, right: 4 } : { left: 0, right: Math.max(2, 5 - Math.floor(step / 2)) };
       if (step === 0) return { left: 0, right: 5 };
       if (step === last) return { left: 5, right: 0 };
@@ -969,7 +1077,7 @@
     const R_PAGE = 'var(--r-page)';
     const placeStacks = (counts, closedBack, step) => {
       const rect = pageFlip.getBoundsRect();
-      const last = stepPages().length - 1;
+      const last = lastStep();
       const place = (el, x) => Object.assign(el.style, {
         left: `${x}px`, top: `${rect.top}px`, width: `${rect.pageWidth}px`, height: `${rect.height}px`,
       });
@@ -988,210 +1096,276 @@
     const updateStacks = (step, other = step) => {
       const a = stackOf(step);
       const b = stackOf(other);
-      const last = stepPages().length - 1;
+      const last = lastStep();
       placeStacks({ left: Math.min(a.left, b.left), right: Math.min(a.right, b.right) }, isPortrait() && step === last && other === last, step === other ? step : -1);
     };
 
     let current = 0;
-    let target = 0;
-    let pending = 0;
-    let busy = false;
-    let ready = false;
-    let jumpUntil = 0;
-    let safety = 0;
+    let bookPlace = { x: 0, scale: 1 };
+    const samePlace = (a, b) => Math.abs(a.x - b.x) < 0.5 && Math.abs(a.scale - b.scale) < 0.001;
 
-    const settle = (step) => {
-      current = step;
-      pageFlip.turnToPage(stepPages()[step]);
-      gsap.set(book, { x: offsetOf(step) });
-      updateStacks(step);
+    // 넘김 조작 상태: 앞표지 = 오른쪽 리본 책갈피 / 펼침면 = 양옆(모바일은 아래) 원형 이전·다음 / 뒤표지 = 왼쪽 원형 이전 하나.
+    // 리본과 뒤표지 이전 버튼은 .book 안에 있어 책이 열리고 닫히며 가운데로 옮겨 갈 때 함께 움직인다.
+    // 사라질 때는 바로, 나타날 때는 책이 거의 자리 잡은 뒤(--nav-delay) (style.css)
+    const nav = year.querySelector('.book-nav');
+    const prevBtn = nav.querySelector('.book-nav-btn--prev');
+    const nextBtn = nav.querySelector('.book-nav-btn--next');
+    const backPrevBtn = book.querySelector('.book-back-prev');
+    const controls = [prevBtn, nextBtn, frontRibbon, backPrevBtn];
+    nav.hidden = false;
+    const navOf = (step) => {
+      if (step === 0) return 'front';
+      if (step === lastStep()) return 'back';
+      return 'spread';
     };
-
-    // 지금 펼쳐진 페이지 번호 → 단계
-    const stepOfPage = (page) => stepPages().reduce((best, p, i) => (p <= page ? i : best), 0);
-
-    const done = () => {
-      if (!busy) return;
-      window.clearTimeout(safety);
-      busy = false;
+    const setNav = (kind, delayMs = 0) => {
+      if (shell.dataset.nav === kind) return;
+      // 숨겨지는 버튼·탭에 포커스가 있었으면 책으로 옮겨 키보드 사용자가 길을 잃지 않게 (책에서 ← → 로 계속 넘길 수 있다)
+      if (controls.includes(document.activeElement)) flipEl.focus({ preventScroll: true });
+      shell.style.setProperty('--nav-delay', `${Math.round(delayMs)}ms`);
+      shell.dataset.nav = kind;
+    };
+    // 덮인 책(펼침 모드의 앞·뒤표지)은 책 영역의 한쪽 반만 보인다 → 포커스 링 자리 (style.css)
+    const markClosed = () => {
+      book.classList.toggle('is-front', !isPortrait() && current === 0);
+      book.classList.toggle('is-back', !isPortrait() && current === lastStep());
+    };
+    // 리본은 책 안에 있어 책과 함께 줄어드므로, 지금 배율을 CSS에 넘겨 리본만 원래 크기로 되돌린다 (style.css --book-scale)
+    const syncScale = () => book.style.setProperty('--book-scale', String(gsap.getProperty(book, 'scale')));
+    const moveBook = (step, duration) => {
+      const place = placeOf(step);
+      if (duration && samePlace(place, bookPlace)) return;
+      bookPlace = place;
+      gsap.to(book, { ...place, duration: duration || 0, ease: 'power2.inOut', overwrite: 'auto', onUpdate: syncScale, onComplete: syncScale });
+    };
+    const settle = () => {
+      current = stepOfPage(pageFlip.getCurrentPageIndex());
       book.classList.remove('is-cover-turn');
-      current = pending;
-      // 라이브러리가 넘김을 조용히 건너뛴 경우(내부 try/catch) 책과 단계가 어긋나지 않게 바로 맞춘다
-      if (stepOfPage(pageFlip.getCurrentPageIndex()) !== current) pageFlip.turnToPage(stepPages()[current]);
-      gsap.set(book, { x: offsetOf(current) });
+      markClosed();
+      moveBook(current, 0);
       updateStacks(current);
-      run();
+      setNav(navOf(current));
     };
 
-    const flipTo = (to) => {
-      busy = true;
-      pending = to;
+    // 넘김 시작(클릭 = flipping, 끌기 = user_fold) → 넘어갈 단계를 보고 표지 그림자·종이 묶음·책 위치를 맞춘다.
+    // 다시 read가 되면 실제 페이지로 확정 (끌다가 놓아 제자리로 돌아온 경우도 여기서 정리)
+    const beginTurn = (animate) => {
+      const calc = controller.getCalculation();
+      if (!calc) return;
+      const to = current + (calc.getDirection() === 0 ? 1 : -1);
+      if (to < 0 || to > lastStep()) return;
       // 표지가 열리고 닫히는 넘김(한쪽이 비어 있는 상태)에는 바깥 그림자를 끈다 (style.css)
-      const last = stepPages().length - 1;
-      book.classList.toggle('is-cover-turn', !isPortrait() && [current, to].some((k) => k === 0 || k === last));
+      book.classList.toggle('is-cover-turn', !isPortrait() && [current, to].some((k) => k === 0 || k === lastStep()));
       // 넘기는 동안은 두 단계 중 얇은 쪽 두께로 (들려 올라간 쪽 아래가 비어 보이게)
       updateStacks(current, to);
       // 열기·닫기: 넘김과 동시에 책이 반 페이지만큼 옮겨 가 끝나면 화면 가운데
-      gsap.to(book, { x: offsetOf(to), duration: FLIP_MS / 1000, ease: 'power2.inOut' });
-      pageFlip.flip(stepPages()[to]);
-      safety = window.setTimeout(done, FLIP_MS + 400);
+      if (animate) moveBook(to, FLIP_MS / 1000);
+      // 클릭 넘김은 끝까지 가므로 도착할 상태로 바로 바꾼다 (새로 나타날 쪽은 넘김 60% 지점부터 페이드인).
+      // 끌기는 놓기 전까지 어디로 갈지 모르니 표지 조작만 걷고, 펼침면 버튼은 그대로(비활성) 둔다
+      if (animate) setNav(navOf(to), FLIP_MS * 0.6);
+      else if (navOf(current) !== 'spread') setNav('none');
     };
+    pageFlip.on('changeState', (e) => {
+      if (e.data === 'flipping') beginTurn(true);
+      // 끌기는 상태가 먼저 바뀌고 넘길 방향은 바로 뒤에 정해진다
+      else if (e.data === 'user_fold') Promise.resolve().then(() => beginTurn(false));
+      else if (e.data === 'read') {
+        const before = bookPlace;
+        current = stepOfPage(pageFlip.getCurrentPageIndex());
+        book.classList.remove('is-cover-turn');
+        markClosed();
+        // 끌어서 넘긴 경우는 종이가 내려앉은 뒤 책이 가운데로 미끄러진다
+        if (!samePlace(placeOf(current), before)) moveBook(current, reduceMotion.matches ? 0 : 0.45);
+        updateStacks(current);
+        setNav(navOf(current), shell.dataset.nav === 'none' ? 0 : FLIP_MS * 0.6);
+      }
+    });
 
-    function run() {
-      if (busy) return;
-      // 첫 계산(새로고침 등)과 앵커 이동 직후에는 넘김 없이 바로 그 단계로
-      if (!ready || performance.now() < jumpUntil) {
-        ready = true;
-        settle(target);
+    // 넘기는 중(또는 끌던 종이가 돌아가는 중)에 들어온 클릭·터치는 라이브러리에 닿기 전에 막는다 → 한 번에 한 장씩
+    // hover로 말려 있던 모서리는 누르는 순간 걷어 내, 클릭·끌기가 누른 자리 기준으로 새로 시작되게
+    const userMove = pageFlip.userMove.bind(pageFlip);
+    const FAR = { x: -9999, y: -9999 };
+    let hintSide = null;
+    const clearHint = () => {
+      if (state() === 'fold_corner' || controller.getCalculation()) {
+        userMove(FAR, false);
+        render.finishAnimation();
+      }
+      hintSide = null;
+    };
+    const guard = (event) => {
+      if (!isIdle()) {
+        event.stopPropagation();
         return;
       }
-      if (target === current) return;
-      // 넘기는 동안 들어온 입력은 쌓지 않고, 끝난 시점의 마지막 목표 단계로 한 번에 넘긴다
-      // (천천히 스크롤하면 목표가 한 단계씩 바뀌므로 한 장씩 넘어간다)
-      flipTo(target);
-    }
-
-    pageFlip.on('changeState', (e) => {
-      if (e.data === 'read') done();
-    });
-
-    // 처음 들어올 때 책이 아래에서 살짝 올라오며 나타남
-    if (!reduceMotion.matches) {
-      gsap.set(book, { y: 60, autoAlpha: 0 });
-      // end: 'max' — 섹션보다 아래에서 새로고침해도(이미 지나간 상태) 바로 보이게
-      ScrollTrigger.create({
-        trigger: year,
-        start: 'top 75%',
-        end: 'max',
-        once: true,
-        onEnter: () => gsap.to(book, { y: 0, autoAlpha: 1, duration: 0.9, ease: 'power2.out' }),
-      });
-    }
-
-    // 고정 + 단계 판단: 한 단계당 한 화면. 마지막(뒤표지) 뒤로 더 내리면 고정이 풀린다
-    // 클릭으로 넘긴 뒤 스크롤이 그 단계 위치에 닿을 때까지는 스크롤 진행도로 단계를 바꾸지 않는다
-    let clickLock = null;
-    const pin = ScrollTrigger.create({
-      trigger: year,
-      start: 'top top',
-      end: () => `+=${window.innerHeight * stepPages().length}`,
-      pin: stage,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-      // 새로고침·리사이즈로 위치가 다시 계산되면 그 위치의 단계로
-      onRefresh: (self) => {
-        const count = stepPages().length;
-        target = Math.min(count - 1, Math.floor(self.progress * count));
-        run();
-      },
-      onUpdate: (self) => {
-        if (clickLock) {
-          if (Math.abs(window.scrollY - clickLock.y) > 4) return;
-          releaseClick();
-        }
-        const count = stepPages().length;
-        target = Math.min(count - 1, Math.floor(self.progress * count));
-        run();
-      },
-    });
-
-    // 단계 k의 스크롤 위치: 그 단계 구간의 가운데
-    const stepScrollY = (step) => {
-      const count = stepPages().length;
-      return pin.start + ((step + 0.5) / count) * (pin.end - pin.start);
+      if (event.type === 'mousedown') clearHint();
     };
-    function releaseClick() {
-      if (!clickLock) return;
-      window.clearTimeout(clickLock.timer);
-      clickLock = null;
-    }
+    flipEl.addEventListener('mousedown', guard, true);
+    flipEl.addEventListener('touchstart', guard, true);
 
-    // 클릭으로 넘기기: 오른쪽 페이지(앞표지 포함) → 다음, 왼쪽 페이지(뒤표지 포함) → 이전.
-    // 넘김을 바로 시작하고 스크롤도 그 단계 위치로 부드럽게 옮겨 스크롤 상태와 늘 맞춘다. 넘기는 중 클릭은 무시
-    const localPoint = (event) => {
-      const box = flipEl.getBoundingClientRect();
-      return { x: event.clientX - box.left, y: event.clientY - box.top };
-    };
-    flipEl.addEventListener('click', (event) => {
-      if (busy || clickLock || !ready) return;
+    // 지금 보이는 페이지 중 마우스 아래 페이지가 넘길 수 있는 쪽인지: 'next' | 'prev' | null.
+    // 라이브러리 판정과 같게 — 펼침은 가운데 접힌 선, 한 페이지는 페이지 왼쪽 40%가 이전
+    const sideAt = ({ x, y }) => {
       const rect = pageFlip.getBoundsRect();
-      const { x } = localPoint(event);
-      const last = stepPages().length - 1;
-      let dir;
-      if (current === 0) dir = 1;
-      else if (current === last) dir = -1;
-      else {
-        // 펼침: 가운데 접힌 선 기준 / 한 페이지: 페이지 가운데 기준
-        const middle = isPortrait() ? rect.left + rect.pageWidth * 1.5 : rect.left + rect.pageWidth;
-        dir = x >= middle ? 1 : -1;
+      const pw = rect.pageWidth;
+      if (y < rect.top || y > rect.top + rect.height) return null;
+      const page = pageFlip.getCurrentPageIndex();
+      const last = pageFlip.getPageCount() - 1;
+      if (isPortrait()) {
+        const left = rect.left + pw;
+        if (x < left || x > left + pw) return null;
+        // 한 페이지 모드의 표지는 어디를 눌러도 앞표지 = 열기, 뒤표지 = 되돌아가기
+        if (page === 0) return 'next';
+        if (page === last) return 'prev';
+        return x - left <= pw * 0.4 ? 'prev' : 'next';
       }
-      const to = current + dir;
-      if (to < 0 || to > last) return;
-      const y = stepScrollY(to);
-      clickLock = { y, timer: window.setTimeout(releaseClick, 1800) };
-      target = to;
-      run();
-      window.scrollTo({ top: y, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
-    });
+      if (x < rect.left || x > rect.left + pw * 2) return null;
+      const side = x >= rect.left + pw ? 'next' : 'prev';
+      if (side === 'next' && page === last) return null; // 뒤표지 오른쪽은 빈 자리
+      if (side === 'prev' && page === 0) return null; // 앞표지 왼쪽은 빈 자리
+      return side;
+    };
 
-    // hover 때 넘길 쪽 모서리가 살짝 말려 올라가는 힌트 (라이브러리 showPageCorners).
-    // 라이브러리는 마우스 위치까지 접기 때문에, 넘길 수 있는 쪽 모서리 160px 안에 들어오면 늘 모서리에서 56px 안쪽 점을 넘겨 같은 크기로 말린다
-    const HINT_ZONE = 160;
+    // hover 힌트: 오른쪽(다음) 페이지 위에서는 오른쪽 아래, 왼쪽(이전) 페이지 위에서는 왼쪽 아래 모서리가 살짝 말려 올라간다.
+    // 라이브러리(showPageCorners)는 마우스가 모서리에 있을 때 그 자리까지 접으므로, 페이지 어디에 있든 아래 모서리 56px 안쪽 점을 넘겨 같은 크기로 말리게 한다.
+    // 끄는 중(누른 상태)에는 실제 위치를 그대로 넘겨 종이가 손을 따라온다
     const HINT_FOLD = 56;
-    flipEl.addEventListener('mousemove', (event) => {
-      if (busy || reduceMotion.matches) return;
+    pageFlip.userMove = (pos, isTouch) => {
+      if (pageFlip.isUserTouch || isTouch) {
+        userMove(pos, isTouch);
+        return;
+      }
+      const side = isIdle() ? sideAt(pos) : null;
+      flipEl.classList.toggle('is-clickable', Boolean(side));
+      if (!isIdle()) return;
+      if (!side || reduceMotion.matches) {
+        if (hintSide) clearHint();
+        return;
+      }
+      // 반대쪽 페이지로 바로 옮겨 가면 앞쪽 접힘을 먼저 걷어 내야 새 모서리로 시작된다
+      if (hintSide && hintSide !== side) clearHint();
+      hintSide = side;
       const rect = pageFlip.getBoundsRect();
-      const last = stepPages().length - 1;
-      const pageLeft = isPortrait() ? rect.left + rect.pageWidth : rect.left;
-      const outerRight = rect.left + rect.pageWidth * 2;
-      const corners = [];
-      if (current < last) corners.push([outerRight, rect.top, -1, 1], [outerRight, rect.top + rect.height, -1, -1]);
-      if (current > 0) corners.push([pageLeft, rect.top, 1, 1], [pageLeft, rect.top + rect.height, 1, -1]);
-      const { x, y } = localPoint(event);
-      const hit = corners.find(([cx, cy]) => Math.hypot(x - cx, y - cy) < HINT_ZONE);
-      pageFlip.userMove(hit ? { x: hit[0] + hit[2] * HINT_FOLD, y: hit[1] + hit[3] * HINT_FOLD } : { x: -9999, y: -9999 }, false);
-    });
-    flipEl.addEventListener('mouseleave', () => {
-      if (busy || reduceMotion.matches) return;
-      pageFlip.userMove({ x: -9999, y: -9999 }, false);
+      const pw = rect.pageWidth;
+      const pageLeft = isPortrait() ? rect.left + pw : rect.left;
+      const x = side === 'next' ? rect.left + pw * 2 - HINT_FOLD : pageLeft + HINT_FOLD;
+      userMove({ x, y: rect.top + rect.height - HINT_FOLD }, false);
+    };
+
+    // 한 페이지 모드에서 표지를 누르면: 라이브러리는 페이지 왼쪽 40%를 '이전'으로 보므로 앞표지 왼쪽을 눌러도 열리지 않는다 → 표지는 어디를 눌러도 열기·되돌아가기
+    const userStop = pageFlip.userStop.bind(pageFlip);
+    pageFlip.userStop = (pos, isSwipe = false) => {
+      if (pageFlip.isUserTouch && !pageFlip.isUserMove && !isSwipe && isPortrait()) {
+        const page = pageFlip.getCurrentPageIndex();
+        const last = pageFlip.getPageCount() - 1;
+        if ((page === 0 || page === last) && sideAt(pos)) {
+          pageFlip.isUserTouch = false;
+          if (page === 0) pageFlip.flipNext('bottom');
+          else pageFlip.flipPrev('bottom');
+          return;
+        }
+      }
+      userStop(pos, isSwipe);
+    };
+
+    // 모바일: 책 위에서 위아래로 밀면 페이지 스크롤로 넘긴다.
+    // 라이브러리는 0.25초 넘게 누르고 있으면 '누름'으로 보고 손을 떼는 순간 넘기므로, 세로로 움직였으면 그 누름을 취소한다
+    let touchStart = null;
+    flipEl.addEventListener('touchstart', (event) => {
+      const t = event.changedTouches[0];
+      touchStart = t ? { x: t.clientX, y: t.clientY } : null;
+    }, { passive: true });
+    flipEl.addEventListener('touchmove', (event) => {
+      const t = event.changedTouches[0];
+      if (!touchStart || !t || state() !== 'read') return;
+      const dx = Math.abs(t.clientX - touchStart.x);
+      const dy = Math.abs(t.clientY - touchStart.y);
+      if (dy > 10 && dy > dx) {
+        ui.touchPoint = null;
+        pageFlip.isUserTouch = false;
+        touchStart = null;
+      }
+    }, { passive: true });
+
+    // 키보드·이전/다음 버튼: 클릭·드래그와 같은 넘김 애니메이션. 넘기는 중에는 무시
+    const turn = (dir) => {
+      if (!isIdle()) return;
+      clearHint();
+      if (dir > 0) pageFlip.flipNext('bottom');
+      else pageFlip.flipPrev('bottom');
+    };
+
+    // 키보드: 책에 포커스가 있을 때 ← → 로 넘기기
+    flipEl.setAttribute('tabindex', '0');
+    flipEl.setAttribute('aria-label', '사과의 일 년 동화책. 왼쪽·오른쪽 방향키로 넘겨요.');
+    flipEl.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      event.preventDefault();
+      turn(event.key === 'ArrowRight' ? 1 : -1);
     });
 
-    // 헤더 "사과의 일 년"을 누르면 넘김 없이 앞표지에서 시작
-    document.querySelectorAll('a[href="#year"]').forEach((link) => {
-      link.addEventListener('click', () => {
-        jumpUntil = performance.now() + 2000;
+    // 버튼·탭: 넘기는 중에는 잠시 비활성. 보이는 쪽은 setNav가, 비활성은 여기서
+    // 클릭·드래그·키보드 어느 쪽으로 넘겨도 라이브러리 flip·changeState 이벤트로 늘 현재 페이지에 맞춘다.
+    // changeState는 라이브러리 내부 상태가 바뀌기 직전에 오므로 새 상태는 이벤트 값(e.data)으로 받는다
+    const syncNav = (now = state()) => {
+      const busy = !idleState(now);
+      controls.forEach((el) => el.setAttribute('aria-disabled', String(busy)));
+    };
+    prevBtn.addEventListener('click', () => turn(-1));
+    nextBtn.addEventListener('click', () => turn(1));
+    backPrevBtn.addEventListener('click', () => turn(-1));
+    // 리본: 바깥쪽으로 살짝 잡아당기듯 12px 나왔다 들어간 뒤 열기.
+    // 당기는 동안 들어온 클릭은 무시. prefers-reduced-motion이면 당김 없이 바로
+    let pulling = false;
+    frontRibbon.addEventListener('click', () => {
+      if (pulling || !isIdle()) return;
+      if (reduceMotion.matches || !frontRibbon.animate) {
+        turn(1);
+        return;
+      }
+      pulling = true;
+      frontRibbon.querySelector('.book-ribbon-sway').animate(
+        [{ transform: 'translateX(0)' }, { transform: `translateX(${RIBBON_PULL}px)`, offset: 0.45 }, { transform: 'translateX(0)' }],
+        { duration: 320, easing: 'ease-in-out' },
+      ).finished.then(() => {
+        pulling = false;
+        turn(1);
       });
     });
+    pageFlip.on('flip', () => syncNav());
+    pageFlip.on('changeState', (e) => syncNav(e.data));
 
-    // 창 크기 변경·회전: 크기 변화가 멈춘 뒤(200ms) 책 크기 → 지금 페이지에 맞는 단계 → 고정 위치 순서로 한 번에 다시 계산.
-    // (리사이즈 도중에 ScrollTrigger.refresh()를 바로 부르면 고정된 상태에서 시작 위치가 틀어진다)
+    // 처음 화면에 들어올 때 한 번만 책이 아래에서 살짝 올라오며 나타남 (스크롤과 연결하지 않고 진입 시 재생).
+    // 이미 지나간 위치에서 새로고침했으면 바로 보이게
+    if (!reduceMotion.matches && 'IntersectionObserver' in window) {
+      gsap.set(book, { y: 60, autoAlpha: 0 });
+      const bookObserver = new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        if (!entry.isIntersecting && entry.boundingClientRect.top > 0) return;
+        bookObserver.disconnect();
+        if (entry.isIntersecting) gsap.to(book, { y: 0, autoAlpha: 1, duration: 0.9, ease: 'power2.out' });
+        else gsap.set(book, { y: 0, autoAlpha: 1 });
+      }, { rootMargin: '0px 0px -25% 0px' });
+      bookObserver.observe(year);
+    }
+
+    // 창 크기 변경·회전: 라이브러리가 책 크기를 다시 잰 뒤(200ms) 지금 페이지 기준으로 위치·종이 묶음을 맞춘다.
     // 펼침 ↔ 한 페이지 모드가 바뀌면 단계 수(6 ↔ 10)도 달라진다
     let resizeTimer = 0;
     const relayout = () => {
       pageFlip.update();
-      const step = stepOfPage(pageFlip.getCurrentPageIndex());
-      window.clearTimeout(safety);
-      busy = false;
-      book.classList.remove('is-cover-turn');
-      settle(step);
-      ScrollTrigger.refresh();
+      clearHint();
+      settle();
     };
-    window.addEventListener('resize', () => {
+    const scheduleRelayout = () => {
       window.clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(relayout, 200);
-    });
-    pageFlip.on('changeOrientation', () => {
-      window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(relayout, 200);
-    });
+    };
+    window.addEventListener('resize', scheduleRelayout);
+    pageFlip.on('changeOrientation', scheduleRelayout);
 
-    // 웹폰트·이미지가 다 불러와진 뒤 위 섹션 높이가 바뀌면 고정 위치를 다시 잰다
-    document.fonts.ready.then(() => ScrollTrigger.refresh());
-    window.addEventListener('load', () => ScrollTrigger.refresh());
-    // 뒤로가기(bfcache)로 돌아왔을 때도 위치와 단계를 다시 맞춘다
-    window.addEventListener('pageshow', (event) => {
-      if (event.persisted) ScrollTrigger.refresh();
-    });
+    settle();
+    syncNav();
   }
 
   /* ---------- Rolling title (2번 한 문장) ---------- */
