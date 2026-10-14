@@ -49,7 +49,6 @@
           <li style="--i:4"><a class="menu-link" href="#contact"><img class="menu-patch" src="asset/apple-patch.webp" alt="" width="680" height="800" loading="lazy"><span>납품 문의</span></a></li>
       </ol>
     </nav>
-    <p class="menu-contact">054-000-0000 · hello@applehouse.kr</p>
     <div class="menu-tree" aria-hidden="true">
       <img class="menu-tree-img" src="asset/apple-tree.webp" alt="" width="970" height="1266" loading="lazy">
         <span class="menu-apple menu-apple--1"><img src="asset/apple-illust-01.webp" alt="" width="420" height="417" loading="lazy"></span>
@@ -115,10 +114,11 @@
       <div class="year-stage">
         <div class="book-shell">
           <div class="book">
-            <!-- 앞표지 리본 책갈피: 속지 사이(표지 아래 레이어)에서 나와 책 오른쪽 옆면 밖으로 가로로 삐져나온 제비꼬리 리본, 표지 위에서 62%.
+            <!-- 앞표지 리본 책갈피: 속지 사이(표지 아래 레이어)에서 나와 책 밖으로 삐져나온 제비꼬리 리본.
+                 PC·태블릿 = 오른쪽 옆면에서 가로로(표지 위에서 62%), 모바일 = 아래 가장자리에서 세로로 늘어짐(오른쪽 끝에서 22%).
                  .book 안이라 책이 옮겨 갈 때 함께 움직인다. 겹: 버튼(위치·hover·나타남/사라짐·그림자) > sway(숨쉬기·당김) > body(V자 리본 모양).
-                 박음질은 리본 외곽 6px 안쪽을 따라가는 점선 (PC 144×56 / 모바일 112×48 리본 크기에 맞춘 path 두 벌, style.css가 하나만 보인다) -->
-            <button class="book-ribbon" type="button" aria-label="책 펼치기"><span class="book-ribbon-sway"><span class="book-ribbon-body"><svg class="book-ribbon-stitch book-ribbon-stitch--pc" viewBox="0 0 144 56" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6H132.3L116.6 28L132.3 50H0"/></svg><svg class="book-ribbon-stitch book-ribbon-stitch--mo" viewBox="0 0 112 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6H100.8L88.8 24L100.8 42H0"/></svg><span class="book-ribbon-label" aria-hidden="true">OPEN</span></span></span></button>
+                 박음질은 리본 외곽 6px 안쪽을 따라가는 점선 (PC 가로 144×56 / 모바일 세로 72×108 크기에 맞춘 path 두 벌, style.css가 하나만 보인다) -->
+            <button class="book-ribbon" type="button" aria-label="책 펼치기"><span class="book-ribbon-sway"><span class="book-ribbon-body"><svg class="book-ribbon-stitch book-ribbon-stitch--pc" viewBox="0 0 144 56" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6H132.3L116.6 28L132.3 50H0"/></svg><svg class="book-ribbon-stitch book-ribbon-stitch--mo" viewBox="0 0 72 108" preserveAspectRatio="none" aria-hidden="true"><path d="M6 0V99.2L36 87.6L66 99.2V0"/></svg><span class="book-ribbon-label" aria-hidden="true">OPEN</span></span></span></button>
             <!-- 뒤표지: 덮인 책 왼쪽 가장자리에서 32px 바깥, 펼침면과 같은 원형 이전 버튼 (겨울 펼침면으로). .book 안이라 책과 함께 움직인다 -->
             <button class="book-nav-btn book-nav-btn--prev book-back-prev" type="button" aria-label="이전 장"><svg class="book-nav-stitch" aria-hidden="true"><rect width="100%" height="100%" rx="50%"/></svg><svg class="book-nav-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13.5 6.5 19 12l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
             <!-- 표지·펼침면 뒤에 깔린 종이 묶음 (두께감, script.js가 위치·두께 조절) -->
@@ -222,9 +222,9 @@
         <div class="story-text">
           <h2 class="section-title reveal">1968년,<br>사과나무 한 그루에서<br>시작했어요</h2>
           <div class="story-body reveal" style="--d:1">
-            <p>할아버지는 청송 산자락에 사과나무를 처음 심으셨어요.<br>낮에는 볕이 뜨겁고 밤에는 서늘한 이 땅이,<br> 사과를 단단하고 달게 만든다는 걸 아셨거든요.</p>
+            <p>할아버지는 청송 산자락에 <br class="br-mo">사과나무를 처음 심으셨어요.<br>낮에는 볕이 뜨겁고 밤에는 서늘한 이 땅이,<br> 사과를 단단하고 달게 만든다는 걸 아셨거든요.</p>
             <p>아버지는 그 나무 옆에 나무를 더 심으셨고,<br>저는 지금 그 나무들 사이에서 일 년을 보냅니다.</p>
-            <p>3대가 지나는 동안 바뀐 것도 많지만,<br>꽃을 솎고, 열매를 고르고, 손으로 따는 일만은 그대로예요.<br>조금 느려도, 그게 한 알을 제대로 키우는 방법이라고 배웠으니까요.</p>
+            <p>3대가 지나는 동안 바뀐 것도 많지만,<br>꽃을 솎고, 열매를 고르고, <br class="br-mo">손으로 따는 일만은 그대로예요.<br>조금 느려도, 그게 한 알을 제대로 키우는 방법이라고 배웠으니까요.</p>
           </div>
           <!-- 편지 끝 서명: 직함 한 줄 + 손글씨 이름 + 빨간 낙관. 들어오면 이름이 손으로 쓰듯 드러나고 낙관이 톡 찍힌다 (style.css) -->
           <div class="story-sign reveal" style="--d:2">

@@ -547,6 +547,7 @@
     // 장면 속 사과는 일러스트 사과 4가지 (01·03은 잎 있음). [파일 번호, 가로, 세로]
     const ILLUST = [[1, 420, 417], [2, 420, 378], [3, 420, 367], [4, 375, 336]];
     const PILE_HEIGHT = 0.2; // 더미 윗면 = 면 높이의 20%
+    const mobileHero = window.matchMedia('(max-width: 760px)');
     const ROWS = 3;
 
     // 매번 같은 더미 모양이 나오도록 고정 시드 난수
@@ -557,14 +558,58 @@
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
 
+    // 모바일(≤760px): 나무 없이 계절 그림이 화면을 채우고, 그 위 화면 맨 아래에 낮고 평평한 더미 (2줄 18개, 윗면 ≤ 화면 높이의 11%).
+    // 사과 지름 = 화면 너비의 13% ±10%. 맨 아랫줄은 화면 아래 가장자리 밖으로 살짝 잘린다.
+    // 더미 윗면 높이를 --hero-pile-top으로 넘겨 헤드라인 블록을 그 16px 위에 놓는다 (style.css)
+    const MOBILE_ROWS = [10, 8];
+    const MOBILE_PILE_MAX = 0.11;
+    const buildMobilePile = (W, H) => {
+      const rand = seeded(1968);
+      const w = W * 0.13;
+      const h = w * APPLE_RATIO;
+      const base = -w * 0.25;
+      const step = Math.max(0, Math.min(h * 0.45, H * MOBILE_PILE_MAX - base - h * 1.1));
+      const list = [];
+      let prevRow = [];
+      MOBILE_ROWS.forEach((n, row) => {
+        const span = W + w * 0.6;
+        const gap = span / n;
+        const thisRow = [];
+        for (let i = 0; i < n; i += 1) {
+          const x = -w * 0.3 + gap * (i + (row % 2 ? 1 : 0.5));
+          const size = w * (0.9 + rand() * 0.2);
+          const below = prevRow.reduce((best, d) => (!best || Math.abs(d.cx - x) < Math.abs(best.cx - x) ? d : best), null);
+          const avoid = [thisRow.at(-1)?.illust, below?.illust];
+          const choices = ILLUST.map((_, k) => k).filter((k) => !avoid.includes(k));
+          const d = {
+            illust: choices[Math.floor(rand() * choices.length)],
+            cx: x + (rand() * 2 - 1) * 6,
+            bottom: base + row * step + (rand() * 2 - 1) * 3,
+            w: size,
+            rot: (rand() * 2 - 1) * 18,
+            row,
+            z: 50 - row * 10 + Math.floor(rand() * 4),
+          };
+          thisRow.push(d);
+          list.push(d);
+        }
+        prevRow = thisRow;
+      });
+      // 더미 윗면 = 가장 높이 올라온 사과 그림의 위끝 (일러스트마다 실제 가로세로 비율로)
+      const top = Math.max(...list.map((d) => d.bottom + d.w * (ILLUST[d.illust][2] / ILLUST[d.illust][1])));
+      heroPanel.closest('.hero').style.setProperty('--hero-pile-top', `${Math.ceil(top)}px`);
+      return list;
+    };
+
     // 더미 자리 (px, 왼쪽 면 기준): 가로 줄 3개를 빈틈없이 채우고, 사과마다 x ±8px · y ±4px · 크기 ±6% · 각도 ±18°만 흔든다.
     // 크기·각도 차이를 작게 둬서 윗면이 면 전체 너비에서 고르다. 맨 아랫줄은 면 아래 가장자리 밖으로 살짝 잘린다
     const buildPile = () => {
       const W = heroPanel.clientWidth;
       const H = heroPanel.clientHeight;
-      const mobile = window.matchMedia('(max-width: 760px)').matches;
+      if (mobileHero.matches) return buildMobilePile(W, H);
+      heroPanel.closest('.hero').style.removeProperty('--hero-pile-top');
       const rand = seeded(1968);
-      const w = H * (mobile ? 0.13 : 0.105);
+      const w = H * 0.105;
       const h = w * APPLE_RATIO;
       const base = -w * 0.25;
       // 맨 윗줄 위끝이 면 높이의 20%에 오도록 줄 간격을 정한다
@@ -615,8 +660,8 @@
     };
 
     const { gsap } = window;
-    // 나무에 사과가 거의 다 열려 갈 무렵(마지막 사과 1.95초) 바로 시작
-    const START_AT = 1800;
+    // 나무에 사과가 거의 다 열려 갈 무렵(마지막 사과 1.95초) 바로 시작. 모바일은 나무가 없어 로드 후 0.6초
+    const START_AT = mobileHero.matches ? 600 : 1800;
     const loadedAt = performance.now();
     let playing = false;
 
@@ -634,10 +679,10 @@
       const W = heroPanel.clientWidth;
       const H = heroPanel.clientHeight;
       // 대기: 면 위쪽 바깥(사과 크기 + 40px 위)에 숨기고 자기 낙하가 시작될 때까지 visibility: hidden.
-      // 출발 가로 위치는 잎 바로 위보다 양옆(0~25%, 75~100%)에 더 많이
+      // 출발 가로 위치는 잎 바로 위보다 양옆(0~25%, 75~100%)에 더 많이 (모바일은 나무가 없어 고르게)
       pileApples.forEach((a) => {
         const h = a.w * APPLE_RATIO;
-        const startX = rand() < 0.7
+        const startX = mobileHero.matches ? between(0, 1) * W : rand() < 0.7
           ? (rand() < 0.5 ? between(0, 0.25) : between(0.75, 1)) * W
           : between(0, 1) * W;
         // 착지 후 구르기는 자기 자리 안에서만 (최대 8px)
@@ -974,6 +1019,7 @@
 
   /* ---------- 3. 사계절 동화책 (StPageFlip, 클릭·드래그로 넘기기) ---------- */
   // 페이지 10장: 0 앞표지(하드) / 1·2 봄 그림·글 / 3·4 여름 / 5·6 가을 / 7·8 겨울 / 9 뒤표지(하드).
+  // 모바일(≤760px)은 계절마다 그림(위) + 글(아래)을 한 장에 담은 6장: 0 앞표지 / 1 봄 / 2 여름 / 3 가을 / 4 겨울 / 5 뒤표지.
   // 스크롤과는 연결하지 않는 일반 섹션. 넘김은 라이브러리 기본 마우스·터치 동작(클릭·끌기·스와이프)에 맡기고,
   // 여기서는 hover 힌트 위치, 표지 가운데 맞추기, 종이 묶음 두께, 키보드, 이전·다음 버튼만 더한다.
   const year = document.querySelector('.year');
@@ -988,9 +1034,31 @@
     const stackRight = year.querySelector('.book-stack--right');
     const FLIP_MS = reduceMotion.matches ? 30 : 900;
 
+    // 모바일 6장 묶음: 표지 두 장은 PC 묶음과 같은 요소를 함께 쓰고, 계절 네 장은 그림 페이지의 그림 + 글 페이지의 글을 복제해 한 장으로.
+    // 화면 폭이 760px을 넘나들면 라이브러리 페이지만 바꿔 끼운다(updateFromHtml). 빠진 묶음의 요소는 참조로 들고 있다가 다시 쓴다
+    const mobileQuery = window.matchMedia('(max-width: 760px)');
+    const desktopPages = [...flipEl.querySelectorAll(':scope > .page')];
+    const buildSinglePage = (i) => {
+      const page = document.createElement('div');
+      page.className = 'page page--single';
+      const content = document.createElement('div');
+      content.className = 'page-content page-content--single';
+      const text = document.createElement('div');
+      text.className = 'page-text';
+      text.append(...[...desktopPages[i + 1].querySelector('.page-content').children].map((el) => el.cloneNode(true)));
+      content.append(desktopPages[i].querySelector('.page-picture').cloneNode(true), text);
+      page.append(content);
+      return page;
+    };
+    const mobilePages = [desktopPages[0], ...[1, 3, 5, 7].map(buildSinglePage), desktopPages[9]];
+    let mobileMode = mobileQuery.matches;
+    const pagesFor = (mobile) => (mobile ? mobilePages : desktopPages);
+    // 페이지 비율: 모바일은 CSS가 정한 책 크기(화면 너비 − 40px × 72svh) 그대로, PC·태블릿은 0.775 : 1
+    const sizeFor = (mobile) => (mobile ? { width: book.clientWidth, height: book.clientHeight } : { width: 550, height: 710 });
+    if (mobileMode) desktopPages.forEach((page) => { if (!mobilePages.includes(page)) page.remove(); });
+
     const pageFlip = new window.St.PageFlip(flipEl, {
-      width: 550,
-      height: 710,
+      ...sizeFor(mobileMode),
       size: 'stretch',
       // 모바일은 표지 책갈피 탭 자리만큼 책이 좁아지므로 최소 크기를 조금 낮춘다 (360px 화면에서 약 296px)
       minWidth: 280,
@@ -1009,7 +1077,7 @@
       clickEventForward: true,
       autoSize: false,
     });
-    pageFlip.loadFromHTML([...flipEl.querySelectorAll(':scope > .page')]);
+    pageFlip.loadFromHTML(pagesFor(mobileMode));
 
     const ui = pageFlip.getUI();
     const render = pageFlip.getRender();
@@ -1018,9 +1086,12 @@
     const idleState = (now) => ['read', 'fold_corner'].includes(now);
     const isIdle = () => idleState(state());
 
-    // 단계 → 페이지 번호. 펼침(landscape)은 6단계, 한 페이지씩(portrait)은 그림·글이 각각 한 단계라 10단계
+    // 단계 → 페이지 번호. 펼침(landscape)은 6단계, 한 페이지씩(태블릿 portrait)은 그림·글이 각각 한 단계라 10단계, 모바일 6장은 6단계
     const isPortrait = () => pageFlip.getOrientation() === 'portrait';
-    const stepPages = () => (isPortrait() ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] : [0, 1, 3, 5, 7, 9]);
+    const stepPages = () => {
+      if (mobileMode) return [0, 1, 2, 3, 4, 5];
+      return isPortrait() ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] : [0, 1, 3, 5, 7, 9];
+    };
     const lastStep = () => stepPages().length - 1;
     // 지금 펼쳐진 페이지 번호 → 단계
     const stepOfPage = (page) => stepPages().reduce((best, p, i) => (p <= page ? i : best), 0);
@@ -1035,7 +1106,8 @@
     const RIBBON_PULL = 12;
     const BACK_GAP = 32;
     const placeOf = (step) => {
-      if (step !== 0 && step !== lastStep()) return { x: 0, scale: 1 };
+      // 모바일: 리본은 책 아래로 늘어지고 뒤표지 이전 버튼은 책 아래 줄에 있어 옆 자리가 필요 없다 → 늘 화면 가운데, 원래 크기
+      if (mobileMode || (step !== 0 && step !== lastStep())) return { x: 0, scale: 1 };
       const dir = step === 0 ? -1 : 1; // 옆 조작 반대쪽으로
       const pw = pageFlip.getBoundsRect().pageWidth;
       if (!isPortrait()) return { x: (dir * pw) / 2, scale: 1 };
@@ -1049,7 +1121,10 @@
     // 종이 묶음 두께(보이는 선 수, 0~5): 넘긴 만큼 왼쪽이 두꺼워지고 오른쪽이 얇아진다
     const stackOf = (step) => {
       const last = lastStep();
-      if (isPortrait()) return step === last ? { left: 0, right: 4 } : { left: 0, right: Math.max(2, 5 - Math.floor(step / 2)) };
+      if (isPortrait()) {
+        if (step === last) return { left: 0, right: 4 };
+        return { left: 0, right: Math.max(2, 5 - (mobileMode ? step : Math.floor(step / 2))) };
+      }
       if (step === 0) return { left: 0, right: 5 };
       if (step === last) return { left: 5, right: 0 };
       return { left: step + 1, right: 6 - step };
@@ -1314,7 +1389,7 @@
     prevBtn.addEventListener('click', () => turn(-1));
     nextBtn.addEventListener('click', () => turn(1));
     backPrevBtn.addEventListener('click', () => turn(-1));
-    // 리본: 바깥쪽으로 살짝 잡아당기듯 12px 나왔다 들어간 뒤 열기.
+    // 리본: 바깥쪽(모바일은 아래)으로 살짝 잡아당기듯 12px 나왔다 들어간 뒤 열기.
     // 당기는 동안 들어온 클릭은 무시. prefers-reduced-motion이면 당김 없이 바로
     let pulling = false;
     frontRibbon.addEventListener('click', () => {
@@ -1324,8 +1399,10 @@
         return;
       }
       pulling = true;
+      // 모바일 리본은 책 아래로 늘어져 있어 아래로 당긴다
+      const pull = mobileMode ? `translateY(${RIBBON_PULL}px)` : `translateX(${RIBBON_PULL}px)`;
       frontRibbon.querySelector('.book-ribbon-sway').animate(
-        [{ transform: 'translateX(0)' }, { transform: `translateX(${RIBBON_PULL}px)`, offset: 0.45 }, { transform: 'translateX(0)' }],
+        [{ transform: 'none' }, { transform: pull, offset: 0.45 }, { transform: 'none' }],
         { duration: 320, easing: 'ease-in-out' },
       ).finished.then(() => {
         pulling = false;
@@ -1349,13 +1426,63 @@
       bookObserver.observe(year);
     }
 
+    // 모바일 한 장 페이지: 글이 페이지를 넘치면 농부 한마디를 빼고(.is-tight), 그래도 넘치면 그림을 46% → 40%로(.is-tighter),
+    // 아주 낮은 화면(640px 안팎)에서도 넘치면 마지막으로 제목·줄간격·간격만 좁힌다(.is-tightest, 본문 16px 이상 유지).
+    // 본문·결과 문장은 항상 남긴다. 라이브러리가 보이지 않는 페이지를 숨겨 두므로, 같은 크기의 보이지 않는 틀에 복제해서 잰다
+    const fitPages = () => {
+      if (!mobileMode) return;
+      const rect = pageFlip.getBoundsRect();
+      const probe = document.createElement('div');
+      probe.className = 'page-fit-probe';
+      Object.assign(probe.style, { width: `${rect.pageWidth}px`, height: `${rect.height}px` });
+      book.append(probe);
+      mobilePages.slice(1, -1).forEach((page) => {
+        const content = page.querySelector('.page-content');
+        const test = content.cloneNode(true);
+        const LEVELS = ['is-tight', 'is-tighter', 'is-tightest'];
+        test.classList.remove(...LEVELS);
+        probe.replaceChildren(test);
+        const overflows = () => test.scrollHeight > test.clientHeight + 1;
+        let level = 0;
+        while (level < LEVELS.length && overflows()) {
+          test.classList.add(LEVELS[level]);
+          level += 1;
+        }
+        LEVELS.forEach((name, i) => content.classList.toggle(name, i < level));
+      });
+      probe.remove();
+    };
+
+    // 지금 보고 있는 자리(0 앞표지 · 1~4 봄~겨울 · 5 뒤표지) ↔ 페이지 번호. 묶음을 바꿔 끼워도 같은 계절을 펼쳐 둔다
+    const posOfPage = (page) => {
+      if (mobileMode) return page;
+      if (page === 0) return 0;
+      return page === desktopPages.length - 1 ? 5 : Math.ceil(page / 2);
+    };
+    const pageOfPos = (pos) => {
+      if (mobileMode) return pos;
+      if (pos === 0) return 0;
+      return pos === 5 ? desktopPages.length - 1 : pos * 2 - 1;
+    };
+    const switchMode = () => {
+      const pos = posOfPage(pageFlip.getCurrentPageIndex());
+      mobileMode = mobileQuery.matches;
+      Object.assign(pageFlip.getSettings(), sizeFor(mobileMode));
+      pageFlip.updateFromHtml(pagesFor(mobileMode));
+      pageFlip.update();
+      pageFlip.turnToPage(pageOfPos(pos));
+    };
+
     // 창 크기 변경·회전: 라이브러리가 책 크기를 다시 잰 뒤(200ms) 지금 페이지 기준으로 위치·종이 묶음을 맞춘다.
-    // 펼침 ↔ 한 페이지 모드가 바뀌면 단계 수(6 ↔ 10)도 달라진다
+    // 펼침 ↔ 한 페이지 모드가 바뀌면 단계 수(6 ↔ 10)도 달라지고, 760px을 넘나들면 페이지 묶음(10장 ↔ 6장)을 바꿔 끼운다
     let resizeTimer = 0;
     const relayout = () => {
+      if (mobileQuery.matches !== mobileMode) switchMode();
+      else if (mobileMode) Object.assign(pageFlip.getSettings(), sizeFor(true));
       pageFlip.update();
       clearHint();
       settle();
+      fitPages();
     };
     const scheduleRelayout = () => {
       window.clearTimeout(resizeTimer);
@@ -1366,6 +1493,9 @@
 
     settle();
     syncNav();
+    fitPages();
+    // 히피체·본문 서체가 늦게 불러와지면 글 높이가 바뀔 수 있다
+    if (document.fonts) document.fonts.ready.then(fitPages);
   }
 
   /* ---------- Rolling title (2번 한 문장) ---------- */

@@ -1110,6 +1110,9 @@ html.is-menu-locked {
   --ribbon-in: 24px;
   --ribbon-notch: 20px;
   --ribbon-label-gap: 30px;
+  /* 바깥쪽 방향: PC·태블릿 오른쪽(1, 0), 모바일 아래(0, 1). 숨김·숨쉬기·hover·당김이 모두 이 방향으로 */
+  --ax: 1;
+  --ay: 0;
   position: absolute;
   z-index: 0;
   top: calc(62% - var(--ribbon-h) / 2);
@@ -1130,7 +1133,7 @@ html.is-menu-locked {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  translate: -28px 0;
+  translate: calc(var(--ax) * -28px) calc(var(--ay) * -28px);
   transition: opacity 0.2s ease, translate 0.2s ease-in, visibility 0s linear 0.2s;
 }
 /* 나타남: 책이 거의 덮인 뒤(--nav-delay) 옆으로 스르륵 빠져나옴 */
@@ -1149,7 +1152,7 @@ html.is-menu-locked {
 }
 @keyframes ribbon-breathe {
   0%, 100% { translate: 0 0; }
-  50% { translate: 3px 0; }
+  50% { translate: calc(var(--ax) * 3px) calc(var(--ay) * 3px); }
 }
 /* 리본 모양: 바깥쪽 끝이 V자로 파인 제비꼬리. 공단 광택(가로로 옅은 밝은 줄) + 위아래 가장자리 1px 진한 베이지(짜임).
    "OPEN"은 V자 끝(안쪽 꼭짓점)에서 30px 안쪽(--ribbon-label-gap), 세로 가운데 */
@@ -1256,8 +1259,8 @@ html.is-menu-locked {
 
 @media (hover: hover) {
   /* 리본: 바깥쪽으로 8px 더 빠져나오고, OPEN은 바깥쪽으로 2px */
-  .book-shell[data-nav] .book-ribbon:not([aria-disabled="true"]):hover { translate: 8px 0; transition-delay: 0s; }
-  .book-ribbon:not([aria-disabled="true"]):hover .book-ribbon-label { translate: 2px 0; }
+  .book-shell[data-nav] .book-ribbon:not([aria-disabled="true"]):hover { translate: calc(var(--ax) * 8px) calc(var(--ay) * 8px); transition-delay: 0s; }
+  .book-ribbon:not([aria-disabled="true"]):hover .book-ribbon-label { translate: calc(var(--ax) * 2px) calc(var(--ay) * 2px); }
   .book-nav-btn:not([aria-disabled="true"]):hover { translate: 0 -2px; box-shadow: 3px 3px 0 var(--ink); }
   .book-nav-btn--prev:not([aria-disabled="true"]):hover .book-nav-arrow { translate: -3px 0; }
   .book-nav-btn--next:not([aria-disabled="true"]):hover .book-nav-arrow { translate: 3px 0; }
@@ -1989,6 +1992,9 @@ html.is-menu-locked {
   animation: apple-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards;
 }
 
+/* 모바일에서만 줄을 바꾸는 자리 (PC에서는 무시) */
+.br-mo { display: none; }
+
 /* ---------- Reveal ---------- */
 .js .reveal {
   opacity: 0;
@@ -2066,7 +2072,7 @@ html.is-menu-locked {
   .menu-toggle-line:first-child { top: 15.5px; }
   .menu-toggle-line:last-child { top: 22.5px; }
   .menu-toggle[aria-expanded="true"] .menu-toggle-line { top: 19px; }
-  .menu-panel { --menu-x: 56px; }
+  .menu-panel { --menu-x: 46px; }
   .menu-nav { top: calc(var(--header-h) + 4vh); }
   .menu-link { font-size: clamp(28px, 8vw, 34px); }
   .menu-tree { right: 4vw; height: 30svh; }
@@ -2078,10 +2084,51 @@ html.is-menu-locked {
   .statement-text { max-width: none; }
   /* 모바일은 텍스트 아래에 농가: 농가 높이 + 32px만큼 자리를 비워 겹치지 않게 */
   .statement .container { margin-bottom: max(0px, var(--farm-h) + 32px - var(--section-y)); }
-  .hero { grid-template-columns: 1fr; grid-template-rows: 60svh 40svh; height: auto; min-height: 0; }
-  .hero-right { order: -1; }
-  .hero-copy { left: 20px; right: 20px; bottom: 32px; }
-  .hero-title { font-size: min(var(--fs-display), (100vw - 40px) / 8.1); }
+  /* 히어로: 계절 그림 한 장이 첫 화면(헤더 제외 100svh)을 꽉 채운다. 빨간 원단·나무는 숨기고,
+     사과 더미를 담는 왼쪽 면(.hero-left)을 투명하게 그림 위에 겹친다 (같은 그리드 칸).
+     레이어(.hero 안에서): 그림(z 1·2) → 아래 40% 크림 그라디언트(z 2) → 계절 입자(z 3) → 사과 더미·떨어지는 사과(z 5) → 헤드라인·서브(z 6).
+     그림 면의 container-type을 풀어 그 안의 헤드라인이 .hero 기준으로 더미 위에 올라오게 한다 (cqw는 화면 너비로 대신 계산됨, 그림 면 = 화면 폭) */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    min-height: 0;
+  }
+  .hero-left,
+  .hero-right { grid-area: 1 / 1; }
+  .hero-right { container-type: normal; }
+  .hero-left {
+    z-index: 5;
+    background: transparent;
+    container-type: normal;
+    pointer-events: none;
+  }
+  .hero-left::before,
+  .hero-tree { display: none; }
+  /* 크롭: 높이에 맞춰 꽉 채우고 오른쪽 기준 → 오른쪽 위 농가가 잘리지 않고 아래 잔디까지 다 보임 (PC와 같은 계산) */
+  /* 글 가독성: 화면 아래 40%에만 투명 → 크림 45% (그림이 뿌옇게 보이지 않을 만큼) */
+  .hero-right::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2; /* 그림(활성 장면 z 2)보다 뒤 DOM이라 위, 계절 입자(z 3)보다 아래 */
+    height: 40%;
+    background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--cream) 45%, transparent));
+    pointer-events: none;
+  }
+  /* 헤드라인·서브: 잔디 위, 사과 더미 바로 위 (블록 아래 = 더미 윗면 + 16px, --hero-pile-top은 script.js가 더미를 쌓을 때 넣는다) */
+  .hero-copy {
+    z-index: 6;
+    left: 20px;
+    right: 20px;
+    bottom: calc(var(--hero-pile-top, 11%) + 16px);
+  }
+  .hero-title { font-size: 34px; line-height: 1.25; }
+  .hero-sub { margin-top: 10px; font-size: 16px; line-height: 1.5; }
   /* 약속: 꼬리표 2×2, 도장 축소 */
   .tags-stage { --tag-w: min(160px, 42vw); --tool-w: 64px; padding-top: 56px; }
   .tags { column-gap: 16px; row-gap: 72px; max-width: calc(var(--tag-w) * 2 + 16px); }
@@ -2089,7 +2136,7 @@ html.is-menu-locked {
   /* 품종: 박스는 화면 너비로, 카드는 박스 위 한 자리에 화면 너비로 */
   .crate-stage { --crate-w: 100%; }
   .variety-card { width: 100%; }
-  /* 3번: 한 페이지씩 넘기는 책 (라이브러리 portrait 모드) — 그림 한 장, 글 한 장씩 이어진다 */
+  /* 3번: 한 페이지씩 넘기는 책 (라이브러리 portrait 모드). JS 책은 계절마다 그림 + 글을 한 장에 (script.js 6장 묶음) */
   .book {
     --book-w: min(100vw - var(--gutter) * 2, (100svh - var(--header-h) - 72px) * 0.775);
     --page-pad: 24px;
@@ -2100,11 +2147,67 @@ html.is-menu-locked {
   .book-flip > .page[data-density="hard"] { width: 100%; }
   .book-nav { margin-top: 24px; }
   .book-shell { --book-ctrl: 48px; }
-  /* 삐져나온 88px 안에 OPEN이 다 보이도록 글자 14px, V자 끝에서 16px (책 가장자리와 약 8px 띄움) */
-  .book-ribbon { --ribbon-out: 88px; --ribbon-notch: 16px; --ribbon-label-gap: 16px; }
-  .book-ribbon-label { font-size: 14px; }
+  /* 책: 화면 너비 − 좌우 20px(최대 550px) × 72svh, 표지·펼친 상태 모두 화면 가로 가운데 (script.js가 옆 자리 보정을 하지 않음).
+     아래로 늘어진 리본(84px + 숨쉬기·당김 15px)이 이전·다음 버튼 줄(24 + 48px)보다 길어 그만큼 섹션 아래 여백을 더한다 */
+  .year.is-book .book { --book-w: min(100vw - var(--gutter) * 2, 550px); height: 72svh; }
+  .year.is-book .year-stage { padding-bottom: calc(var(--section-y) + 28px); }
+  /* 한 장 페이지: 안쪽 20px, 위 그림 46%(radius 12px) → 계절 표기 · 제목 · 본문 · 한마디 · 결과 문장.
+     넘치면 한마디를 빼고(.is-tight), 그래도 넘치면 그림 40%(.is-tighter), 그래도 넘치면 간격만 좁힘(.is-tightest) — script.js fitPages */
+  .book-flip .page--single { border-radius: 0 var(--r-page) var(--r-page) 0; background: var(--cream); }
+  .page-content--single { justify-content: flex-start; padding: 20px; }
+  .page-content--single .page-picture { flex: none; height: 46%; }
+  .page-content--single.is-tighter .page-picture { height: 40%; }
+  .page-content--single.is-tight .page-quote { display: none; }
+  .page-content--single.is-tightest .page-text { margin-top: 12px; }
+  .page-content--single.is-tightest .page-title { font-size: 26px; }
+  .page-content--single.is-tightest .page-do { font-size: 16px; line-height: 1.5; }
+  .page-content--single.is-tightest .page-result { margin-top: 8px; }
+  /* 앞쪽 농부(그림 가로 약 35%, 머리~손이 세로 20~50%)가 가로로 긴 틀에서도 잘리지 않게 */
+  .page-content--single .page-picture img { object-position: 35% 28%; }
+  .page-text { margin-top: 18px; }
+  .page-text .page-when { font-size: 15px; }
+  .page-text .page-title { margin-top: 4px; font-size: 30px; }
+  .page-text .page-do { margin-top: 8px; line-height: 1.6; }
+  .page-text .page-quote { margin-top: 10px; line-height: 1.6; }
+  .page-text .page-result { margin-top: 12px; }
+  .page-fit-probe { position: absolute; top: 0; left: 0; visibility: hidden; pointer-events: none; }
+  /* 리본: 책 아래 가장자리에서 아래로 늘어진 세로 제비꼬리 (너비 72px, 84px 늘어짐, V자 14px). 오른쪽 끝에서 22% 안쪽에 오른쪽 끝을 맞춰 맨 위로 버튼 자리와 겹치지 않게.
+     PC 리본과 같은 베이지·광택(세로 줄)·양옆 6px 안쪽 박음질(V자를 따라 꺾임), OPEN은 가로로 세로 가운데보다 살짝 위 */
+  .book-ribbon {
+    --ribbon-out: 84px;
+    --ribbon-notch: 14px;
+    --ax: 0;
+    --ay: 1;
+    top: calc(100% - var(--ribbon-in));
+    left: auto;
+    right: 22%;
+    width: 72px;
+    height: calc(var(--ribbon-in) + var(--ribbon-out));
+    transform-origin: 50% var(--ribbon-in);
+  }
+  .book-ribbon-body {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: calc(var(--ribbon-in) + 26px) 0 0;
+    background:
+      linear-gradient(90deg, #CDB894 0 1px, transparent 1px calc(100% - 1px), #CDB894 calc(100% - 1px)),
+      linear-gradient(90deg, transparent 20%, rgba(255, 255, 255, 0.5) 36%, rgba(255, 255, 255, 0.12) 50%, transparent 62%),
+      #E6D5B8;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - var(--ribbon-notch)), 0 100%);
+  }
+  .book-ribbon-label { margin-right: -0.1em; font-size: 16px; letter-spacing: 0.1em; }
   .book-ribbon-stitch--pc { display: none; }
   .book-ribbon-stitch--mo { display: block; }
+  /* 뒤표지: 리본 없이 원형 이전 버튼만 — 옆 자리가 없으니 책 아래 버튼 줄 가운데에 (다음 버튼은 빠짐) */
+  .book .book-back-prev { display: none; }
+  .book-shell[data-nav="back"] .book-nav .book-nav-btn--prev {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.35s ease var(--nav-delay), visibility 0s linear var(--nav-delay), translate 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+  }
+  .book-shell[data-nav="back"] .book-nav .book-nav-btn--next { display: none; }
   .page-title { margin-top: 8px; }
   .page-do { margin-top: 10px; font-size: var(--fs-body); line-height: 1.7; }
   .page-result { margin-top: 20px; font-size: 17px; }
@@ -2127,6 +2230,14 @@ html.is-menu-locked {
   .field input,
   .field select { min-height: 52px; }
   .story-figure { width: min(90vw, 100%); max-width: none; }
+  /* 이야기: 타이틀 → 가족 그림 → 본문 → 서명 순서로. 글 묶음(.story-text)을 풀어 그림을 타이틀 바로 아래에 끼운다 */
+  .story-grid { gap: 0; }
+  .story-text { display: contents; }
+  .story-text > .section-title { order: 1; }
+  .story-figure { order: 2; margin-top: 32px; }
+  .story-body { order: 3; margin-top: 32px; }
+  .story-sign { order: 4; }
+  .br-mo { display: inline; }
 }
 
 /* ---------- Reduced motion ---------- */
